@@ -1,0 +1,11 @@
+cdn_node_id,hypergiant_id,peering_ip_node_id,peering_capacity_gbps,allocated_gbps,peering_utilization
+cdn_0,hg_0,ip_14,1500.000,456.000,0.304
+cdn_1,hg_0,ip_4,1500.000,394.000,0.263
+cdn_2,hg_1,ip_28,1000.000,584.000,0.584
+cdn_3,hg_1,ip_29,1400.000,369.000,0.264
+cdn_4,hg_2,ip_14,1300.000,522.000,0.402
+cdn_5,hg_2,ip_4,800.000,456.000,0.570
+cdn_6,hg_3,ip_13,1600.000,532.000,0.333
+cdn_7,hg_3,ip_28,1500.000,398.000,0.265
+cdn_8,hg_4,ip_11,1200.000,398.000,0.332
+cdn_9,hg_4,ip_1,800.000,524.000,0.655

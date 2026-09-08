@@ -1,0 +1,11 @@
+cdn_node_id,hypergiant_id,peering_ip_node_id,peering_pop_id,peering_capacity_gbps,distance_to_ip
+cdn_0,hg_0,ip_14,pop_14,1500,50.561
+cdn_1,hg_0,ip_4,pop_4,1500,29.211
+cdn_2,hg_1,ip_28,pop_28,1000,33.047
+cdn_3,hg_1,ip_29,pop_29,1400,47.162
+cdn_4,hg_2,ip_14,pop_14,1300,36.515
+cdn_5,hg_2,ip_4,pop_4,800,77.855
+cdn_6,hg_3,ip_13,pop_13,1600,29.066
+cdn_7,hg_3,ip_28,pop_28,1500,39.726
+cdn_8,hg_4,ip_11,pop_11,1200,11.199
+cdn_9,hg_4,ip_1,pop_1,800,28.321
