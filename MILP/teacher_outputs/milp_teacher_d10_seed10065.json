@@ -1,0 +1,2502 @@
+{
+  "case": {
+    "num_demands": 10,
+    "seed": 10065,
+    "solver": "cplex",
+    "threads": 1,
+    "time_limit_seconds": null
+  },
+  "input": {
+    "topology_name": "generated_d10_seed10065",
+    "ip_candidate_mode": "generated",
+    "constraint_profile": "sa_compatible",
+    "num_transceivers_per_ip_node": 70,
+    "ip_link_utilization": null,
+    "rho_limit": 35,
+    "optical_candidate_k": 10,
+    "ip_to_opt_map": {
+      "0": 9,
+      "1": 3,
+      "2": 0,
+      "3": 6,
+      "4": 1,
+      "5": 7
+    },
+    "generated_ip_edges": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "physical_edges": [
+      {
+        "source": 0,
+        "target": 1,
+        "length": 44.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 0,
+        "target": 5,
+        "length": 29.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 0,
+        "target": 8,
+        "length": 40.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 0,
+        "target": 9,
+        "length": 62.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 1,
+        "target": 4,
+        "length": 88.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 1,
+        "target": 7,
+        "length": 25.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 2,
+        "target": 5,
+        "length": 80.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 2,
+        "target": 6,
+        "length": 69.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 2,
+        "target": 7,
+        "length": 84.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 2,
+        "target": 8,
+        "length": 92.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 3,
+        "target": 6,
+        "length": 85.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 4,
+        "target": 5,
+        "length": 12.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 4,
+        "target": 9,
+        "length": 55.0,
+        "fiber_capacity_slots": 70
+      },
+      {
+        "source": 5,
+        "target": 7,
+        "length": 95.0,
+        "fiber_capacity_slots": 70
+      }
+    ],
+    "demands": [
+      {
+        "id": "d0",
+        "source": 4,
+        "target": 1,
+        "bandwidth": 22.0
+      },
+      {
+        "id": "d1",
+        "source": 1,
+        "target": 0,
+        "bandwidth": 21.0
+      },
+      {
+        "id": "d2",
+        "source": 1,
+        "target": 0,
+        "bandwidth": 54.0
+      },
+      {
+        "id": "d3",
+        "source": 4,
+        "target": 2,
+        "bandwidth": 24.0
+      },
+      {
+        "id": "d4",
+        "source": 0,
+        "target": 5,
+        "bandwidth": 99.0
+      },
+      {
+        "id": "d5",
+        "source": 0,
+        "target": 1,
+        "bandwidth": 79.0
+      },
+      {
+        "id": "d6",
+        "source": 2,
+        "target": 1,
+        "bandwidth": 91.0
+      },
+      {
+        "id": "d7",
+        "source": 3,
+        "target": 4,
+        "bandwidth": 46.0
+      },
+      {
+        "id": "d8",
+        "source": 5,
+        "target": 2,
+        "bandwidth": 57.0
+      },
+      {
+        "id": "d9",
+        "source": 0,
+        "target": 4,
+        "bandwidth": 100.0
+      }
+    ],
+    "milp_demands": [
+      {
+        "key": [
+          "d0",
+          "IPN-IP-4(ON-O-1)",
+          "IPN-IP-1(ON-O-3)"
+        ],
+        "id": "d0",
+        "source": 4,
+        "target": 1,
+        "bandwidth": 22.0
+      },
+      {
+        "key": [
+          "d1",
+          "IPN-IP-1(ON-O-3)",
+          "IPN-IP-0(ON-O-9)"
+        ],
+        "id": "d1",
+        "source": 1,
+        "target": 0,
+        "bandwidth": 21.0
+      },
+      {
+        "key": [
+          "d2",
+          "IPN-IP-1(ON-O-3)",
+          "IPN-IP-0(ON-O-9)"
+        ],
+        "id": "d2",
+        "source": 1,
+        "target": 0,
+        "bandwidth": 54.0
+      },
+      {
+        "key": [
+          "d3",
+          "IPN-IP-4(ON-O-1)",
+          "IPN-IP-2(ON-O-0)"
+        ],
+        "id": "d3",
+        "source": 4,
+        "target": 2,
+        "bandwidth": 24.0
+      },
+      {
+        "key": [
+          "d4",
+          "IPN-IP-0(ON-O-9)",
+          "IPN-IP-5(ON-O-7)"
+        ],
+        "id": "d4",
+        "source": 0,
+        "target": 5,
+        "bandwidth": 99.0
+      },
+      {
+        "key": [
+          "d5",
+          "IPN-IP-0(ON-O-9)",
+          "IPN-IP-1(ON-O-3)"
+        ],
+        "id": "d5",
+        "source": 0,
+        "target": 1,
+        "bandwidth": 79.0
+      },
+      {
+        "key": [
+          "d6",
+          "IPN-IP-2(ON-O-0)",
+          "IPN-IP-1(ON-O-3)"
+        ],
+        "id": "d6",
+        "source": 2,
+        "target": 1,
+        "bandwidth": 91.0
+      },
+      {
+        "key": [
+          "d7",
+          "IPN-IP-3(ON-O-6)",
+          "IPN-IP-4(ON-O-1)"
+        ],
+        "id": "d7",
+        "source": 3,
+        "target": 4,
+        "bandwidth": 46.0
+      },
+      {
+        "key": [
+          "d8",
+          "IPN-IP-5(ON-O-7)",
+          "IPN-IP-2(ON-O-0)"
+        ],
+        "id": "d8",
+        "source": 5,
+        "target": 2,
+        "bandwidth": 57.0
+      },
+      {
+        "key": [
+          "d9",
+          "IPN-IP-0(ON-O-9)",
+          "IPN-IP-4(ON-O-1)"
+        ],
+        "id": "d9",
+        "source": 0,
+        "target": 4,
+        "bandwidth": 100.0
+      }
+    ],
+    "baseline_lightpaths": [
+      {
+        "id": 0,
+        "ip_link": [
+          4,
+          1
+        ],
+        "opt_path": [
+          1,
+          0,
+          5,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 1
+      },
+      {
+        "id": 1,
+        "ip_link": [
+          4,
+          1
+        ],
+        "opt_path": [
+          1,
+          7,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 2,
+        "ip_link": [
+          1,
+          3
+        ],
+        "opt_path": [
+          3,
+          6
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 3,
+        "ip_link": [
+          3,
+          5
+        ],
+        "opt_path": [
+          6,
+          2,
+          5,
+          4,
+          9,
+          0,
+          1,
+          7
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 4,
+        "ip_link": [
+          5,
+          2
+        ],
+        "opt_path": [
+          7,
+          5,
+          0
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 1
+      },
+      {
+        "id": 5,
+        "ip_link": [
+          2,
+          0
+        ],
+        "opt_path": [
+          0,
+          9
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 6,
+        "ip_link": [
+          1,
+          0
+        ],
+        "opt_path": [
+          3,
+          6,
+          2,
+          7,
+          1,
+          0,
+          5,
+          4,
+          9
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 7,
+        "ip_link": [
+          1,
+          0
+        ],
+        "opt_path": [
+          3,
+          6,
+          2,
+          5,
+          4,
+          1,
+          0,
+          9
+        ],
+        "slot_start": 2,
+        "slots": 1,
+        "path_id": 9
+      },
+      {
+        "id": 8,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          1,
+          7
+        ],
+        "slot_start": 2,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 9,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          5,
+          7
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 4
+      },
+      {
+        "id": 10,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          4,
+          1,
+          7
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 3
+      },
+      {
+        "id": 11,
+        "ip_link": [
+          0,
+          2
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          2,
+          7,
+          1,
+          0
+        ],
+        "slot_start": 4,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 12,
+        "ip_link": [
+          0,
+          2
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          0
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 1
+      },
+      {
+        "id": 13,
+        "ip_link": [
+          2,
+          5
+        ],
+        "opt_path": [
+          0,
+          1,
+          4,
+          5,
+          7
+        ],
+        "slot_start": 5,
+        "slots": 1,
+        "path_id": 7
+      },
+      {
+        "id": 14,
+        "ip_link": [
+          2,
+          5
+        ],
+        "opt_path": [
+          0,
+          1,
+          4,
+          5,
+          7
+        ],
+        "slot_start": 6,
+        "slots": 1,
+        "path_id": 7
+      },
+      {
+        "id": 15,
+        "ip_link": [
+          2,
+          5
+        ],
+        "opt_path": [
+          0,
+          1,
+          4,
+          5,
+          7
+        ],
+        "slot_start": 7,
+        "slots": 1,
+        "path_id": 7
+      },
+      {
+        "id": 16,
+        "ip_link": [
+          5,
+          3
+        ],
+        "opt_path": [
+          7,
+          1,
+          0,
+          9,
+          4,
+          5,
+          2,
+          6
+        ],
+        "slot_start": 8,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 17,
+        "ip_link": [
+          5,
+          3
+        ],
+        "opt_path": [
+          7,
+          5,
+          4,
+          9,
+          0,
+          8,
+          2,
+          6
+        ],
+        "slot_start": 4,
+        "slots": 1,
+        "path_id": 9
+      },
+      {
+        "id": 18,
+        "ip_link": [
+          5,
+          3
+        ],
+        "opt_path": [
+          7,
+          1,
+          4,
+          9,
+          0,
+          5,
+          2,
+          6
+        ],
+        "slot_start": 9,
+        "slots": 1,
+        "path_id": 8
+      },
+      {
+        "id": 19,
+        "ip_link": [
+          3,
+          1
+        ],
+        "opt_path": [
+          6,
+          3
+        ],
+        "slot_start": 2,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 20,
+        "ip_link": [
+          3,
+          1
+        ],
+        "opt_path": [
+          6,
+          3
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 21,
+        "ip_link": [
+          3,
+          1
+        ],
+        "opt_path": [
+          6,
+          3
+        ],
+        "slot_start": 4,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 22,
+        "ip_link": [
+          1,
+          4
+        ],
+        "opt_path": [
+          3,
+          6,
+          2,
+          8,
+          0,
+          1
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 2
+      },
+      {
+        "id": 23,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          5,
+          4,
+          1
+        ],
+        "slot_start": 5,
+        "slots": 1,
+        "path_id": 2
+      },
+      {
+        "id": 24,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          5,
+          4,
+          9,
+          0,
+          1
+        ],
+        "slot_start": 8,
+        "slots": 1,
+        "path_id": 6
+      }
+    ]
+  },
+  "milp": {
+    "status": 101,
+    "status_name": "integer optimal solution",
+    "objective": 15.0,
+    "solver_time_ms": 507.99739989452064,
+    "best_bound": 15.0,
+    "problem_stats": {
+      "variables": 10100,
+      "binary_variables": 10100,
+      "flow_variables": 160,
+      "lightpath_variables": 9940,
+      "constraints": 2157,
+      "allowed_ip_edges": 16,
+      "num_slots": 70,
+      "optical_candidate_k": 10
+    }
+  },
+  "sa_constraint_check": {
+    "lightpaths": 15,
+    "energy_cost": 15.0,
+    "objective_cost": 15,
+    "feasible": true,
+    "constraint_violations": 0,
+    "flow_violations": 0,
+    "capacity_violations": 0,
+    "capacity_excess_bandwidth": 0.0,
+    "spectrum_violations": 0,
+    "mapping_violations": 0,
+    "z_consistency_violations": 0,
+    "y_consistency_violations": 0,
+    "non_disruptive_violations": 0,
+    "reconfiguration_distance": 34,
+    "rho_limit": 35,
+    "delay_cost": 0.0,
+    "penalty": 0.0,
+    "penalty_flow": 0.0,
+    "penalty_capacity": 0.0,
+    "penalty_spectrum": 0.0,
+    "penalty_lightpath_consistency": 0.0,
+    "penalty_non_disruptive": 0.0,
+    "objective_cost_checked_by_sa": 15.0
+  },
+  "solution": {
+    "ip_links": [
+      {
+        "node1": "IP-0",
+        "node2": "IP-1",
+        "num_trunks": 3.0,
+        "opt_links": [
+          [
+            "O-9",
+            "O-4",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-4",
+            "O-5",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-5",
+            "O-0",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-0",
+            "O-1",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-1",
+            "O-7",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-7",
+            "O-2",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-2",
+            "O-6",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-6",
+            "O-3",
+            1.0,
+            6,
+            43
+          ],
+          [
+            "O-9",
+            "O-4",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-4",
+            "O-1",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-1",
+            "O-7",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-7",
+            "O-2",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-2",
+            "O-6",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-6",
+            "O-3",
+            1.0,
+            7,
+            23
+          ],
+          [
+            "O-9",
+            "O-0",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-0",
+            "O-1",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-1",
+            "O-4",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-4",
+            "O-5",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-5",
+            "O-2",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-2",
+            "O-6",
+            1.0,
+            9,
+            68
+          ],
+          [
+            "O-6",
+            "O-3",
+            1.0,
+            9,
+            68
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-0",
+        "node2": "IP-5",
+        "num_trunks": 3.0,
+        "opt_links": [
+          [
+            "O-9",
+            "O-0",
+            1.0,
+            4,
+            3
+          ],
+          [
+            "O-0",
+            "O-5",
+            1.0,
+            4,
+            3
+          ],
+          [
+            "O-5",
+            "O-7",
+            1.0,
+            4,
+            3
+          ],
+          [
+            "O-9",
+            "O-0",
+            1.0,
+            4,
+            69
+          ],
+          [
+            "O-0",
+            "O-5",
+            1.0,
+            4,
+            69
+          ],
+          [
+            "O-5",
+            "O-7",
+            1.0,
+            4,
+            69
+          ],
+          [
+            "O-9",
+            "O-4",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-4",
+            "O-5",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-5",
+            "O-2",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-2",
+            "O-7",
+            1.0,
+            6,
+            45
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-1",
+        "node2": "IP-0",
+        "num_trunks": 1.0,
+        "opt_links": [
+          [
+            "O-3",
+            "O-6",
+            1.0,
+            2,
+            69
+          ],
+          [
+            "O-6",
+            "O-2",
+            1.0,
+            2,
+            69
+          ],
+          [
+            "O-2",
+            "O-8",
+            1.0,
+            2,
+            69
+          ],
+          [
+            "O-8",
+            "O-0",
+            1.0,
+            2,
+            69
+          ],
+          [
+            "O-0",
+            "O-9",
+            1.0,
+            2,
+            69
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-2",
+        "node2": "IP-0",
+        "num_trunks": 2.0,
+        "opt_links": [
+          [
+            "O-0",
+            "O-9",
+            1.0,
+            0,
+            0
+          ],
+          [
+            "O-0",
+            "O-9",
+            1.0,
+            0,
+            1
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-3",
+        "node2": "IP-5",
+        "num_trunks": 1.0,
+        "opt_links": [
+          [
+            "O-6",
+            "O-2",
+            1.0,
+            0,
+            0
+          ],
+          [
+            "O-2",
+            "O-7",
+            1.0,
+            0,
+            0
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-4",
+        "node2": "IP-5",
+        "num_trunks": 1.0,
+        "opt_links": [
+          [
+            "O-1",
+            "O-7",
+            1.0,
+            0,
+            1
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-5",
+        "node2": "IP-2",
+        "num_trunks": 2.0,
+        "opt_links": [
+          [
+            "O-7",
+            "O-5",
+            1.0,
+            1,
+            0
+          ],
+          [
+            "O-5",
+            "O-0",
+            1.0,
+            1,
+            0
+          ],
+          [
+            "O-7",
+            "O-1",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-1",
+            "O-4",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-4",
+            "O-9",
+            1.0,
+            6,
+            45
+          ],
+          [
+            "O-9",
+            "O-0",
+            1.0,
+            6,
+            45
+          ]
+        ],
+        "path_num": null
+      },
+      {
+        "node1": "IP-5",
+        "node2": "IP-4",
+        "num_trunks": 2.0,
+        "opt_links": [
+          [
+            "O-7",
+            "O-1",
+            1.0,
+            0,
+            1
+          ],
+          [
+            "O-7",
+            "O-1",
+            1.0,
+            0,
+            69
+          ]
+        ],
+        "path_num": null
+      }
+    ],
+    "lightpaths": [
+      {
+        "id": 0,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          0,
+          1,
+          7,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 43,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 1,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          4,
+          1,
+          7,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 23,
+        "slots": 1,
+        "path_id": 7
+      },
+      {
+        "id": 2,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          0,
+          1,
+          4,
+          5,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 68,
+        "slots": 1,
+        "path_id": 9
+      },
+      {
+        "id": 3,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          5,
+          7
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 4
+      },
+      {
+        "id": 4,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          5,
+          7
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 4
+      },
+      {
+        "id": 5,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          2,
+          7
+        ],
+        "slot_start": 45,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 6,
+        "ip_link": [
+          1,
+          0
+        ],
+        "opt_path": [
+          3,
+          6,
+          2,
+          8,
+          0,
+          9
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 2
+      },
+      {
+        "id": 7,
+        "ip_link": [
+          2,
+          0
+        ],
+        "opt_path": [
+          0,
+          9
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 8,
+        "ip_link": [
+          2,
+          0
+        ],
+        "opt_path": [
+          0,
+          9
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 9,
+        "ip_link": [
+          3,
+          5
+        ],
+        "opt_path": [
+          6,
+          2,
+          7
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 10,
+        "ip_link": [
+          4,
+          5
+        ],
+        "opt_path": [
+          1,
+          7
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 11,
+        "ip_link": [
+          5,
+          2
+        ],
+        "opt_path": [
+          7,
+          5,
+          0
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 1
+      },
+      {
+        "id": 12,
+        "ip_link": [
+          5,
+          2
+        ],
+        "opt_path": [
+          7,
+          1,
+          4,
+          9,
+          0
+        ],
+        "slot_start": 45,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 13,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          1
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 14,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          1
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 0
+      }
+    ],
+    "cdn_assignment": [],
+    "e2e_routing": [
+      {
+        "demand_id": "d0",
+        "node1": "IP-4",
+        "node2": "IP-1",
+        "paths": [
+          [
+            [
+              "IP-0",
+              "IP-1"
+            ],
+            22.0
+          ],
+          [
+            [
+              "IP-2",
+              "IP-0"
+            ],
+            22.0
+          ],
+          [
+            [
+              "IP-4",
+              "IP-5"
+            ],
+            22.0
+          ],
+          [
+            [
+              "IP-5",
+              "IP-2"
+            ],
+            22.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d1",
+        "node1": "IP-1",
+        "node2": "IP-0",
+        "paths": [
+          [
+            [
+              "IP-1",
+              "IP-0"
+            ],
+            21.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d2",
+        "node1": "IP-1",
+        "node2": "IP-0",
+        "paths": [
+          [
+            [
+              "IP-1",
+              "IP-0"
+            ],
+            54.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d3",
+        "node1": "IP-4",
+        "node2": "IP-2",
+        "paths": [
+          [
+            [
+              "IP-4",
+              "IP-5"
+            ],
+            24.0
+          ],
+          [
+            [
+              "IP-5",
+              "IP-2"
+            ],
+            24.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d4",
+        "node1": "IP-0",
+        "node2": "IP-5",
+        "paths": [
+          [
+            [
+              "IP-0",
+              "IP-5"
+            ],
+            99.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d5",
+        "node1": "IP-0",
+        "node2": "IP-1",
+        "paths": [
+          [
+            [
+              "IP-0",
+              "IP-1"
+            ],
+            79.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d6",
+        "node1": "IP-2",
+        "node2": "IP-1",
+        "paths": [
+          [
+            [
+              "IP-0",
+              "IP-1"
+            ],
+            91.0
+          ],
+          [
+            [
+              "IP-2",
+              "IP-0"
+            ],
+            91.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d7",
+        "node1": "IP-3",
+        "node2": "IP-4",
+        "paths": [
+          [
+            [
+              "IP-3",
+              "IP-5"
+            ],
+            46.0
+          ],
+          [
+            [
+              "IP-5",
+              "IP-4"
+            ],
+            46.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d8",
+        "node1": "IP-5",
+        "node2": "IP-2",
+        "paths": [
+          [
+            [
+              "IP-5",
+              "IP-2"
+            ],
+            57.0
+          ]
+        ]
+      },
+      {
+        "demand_id": "d9",
+        "node1": "IP-0",
+        "node2": "IP-4",
+        "paths": [
+          [
+            [
+              "IP-0",
+              "IP-5"
+            ],
+            100.0
+          ],
+          [
+            [
+              "IP-5",
+              "IP-4"
+            ],
+            100.0
+          ]
+        ]
+      }
+    ],
+    "metrics": {
+      "num_ip_links": 8,
+      "deployed_ip_trunks": 15.0,
+      "total_num_lightpath_hops": 49,
+      "max_path_length_ip_hops": 4,
+      "min_path_length_ip_hops": 1,
+      "mean_path_length_ip_hops": 1.7,
+      "solver_time": 507.99739989452064,
+      "status": 101,
+      "status_name": "integer optimal solution",
+      "objective": 15.0,
+      "best_bound": 15.0
+    }
+  },
+  "teacher": {
+    "ip_links": [
+      {
+        "source": 0,
+        "target": 1,
+        "num_trunks": 3.0,
+        "optical_paths": [
+          {
+            "path_id": 6,
+            "hops": [
+              {
+                "source": 9,
+                "target": 4,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 4,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 5,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 0,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 1,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 7,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 2,
+                "target": 6,
+                "trunks": 1.0,
+                "slot_start": 43
+              },
+              {
+                "source": 6,
+                "target": 3,
+                "trunks": 1.0,
+                "slot_start": 43
+              }
+            ]
+          },
+          {
+            "path_id": 7,
+            "hops": [
+              {
+                "source": 9,
+                "target": 4,
+                "trunks": 1.0,
+                "slot_start": 23
+              },
+              {
+                "source": 4,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 23
+              },
+              {
+                "source": 1,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 23
+              },
+              {
+                "source": 7,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 23
+              },
+              {
+                "source": 2,
+                "target": 6,
+                "trunks": 1.0,
+                "slot_start": 23
+              },
+              {
+                "source": 6,
+                "target": 3,
+                "trunks": 1.0,
+                "slot_start": 23
+              }
+            ]
+          },
+          {
+            "path_id": 9,
+            "hops": [
+              {
+                "source": 9,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 0,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 1,
+                "target": 4,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 4,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 5,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 2,
+                "target": 6,
+                "trunks": 1.0,
+                "slot_start": 68
+              },
+              {
+                "source": 6,
+                "target": 3,
+                "trunks": 1.0,
+                "slot_start": 68
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 0,
+        "target": 5,
+        "num_trunks": 3.0,
+        "optical_paths": [
+          {
+            "path_id": 4,
+            "hops": [
+              {
+                "source": 9,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 3
+              },
+              {
+                "source": 0,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 3
+              },
+              {
+                "source": 5,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 3
+              },
+              {
+                "source": 9,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 0,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 5,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 69
+              }
+            ]
+          },
+          {
+            "path_id": 6,
+            "hops": [
+              {
+                "source": 9,
+                "target": 4,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 4,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 5,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 2,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 45
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 1,
+        "target": 0,
+        "num_trunks": 1.0,
+        "optical_paths": [
+          {
+            "path_id": 2,
+            "hops": [
+              {
+                "source": 3,
+                "target": 6,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 6,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 2,
+                "target": 8,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 8,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 69
+              },
+              {
+                "source": 0,
+                "target": 9,
+                "trunks": 1.0,
+                "slot_start": 69
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 2,
+        "target": 0,
+        "num_trunks": 2.0,
+        "optical_paths": [
+          {
+            "path_id": 0,
+            "hops": [
+              {
+                "source": 0,
+                "target": 9,
+                "trunks": 1.0,
+                "slot_start": 0
+              },
+              {
+                "source": 0,
+                "target": 9,
+                "trunks": 1.0,
+                "slot_start": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 3,
+        "target": 5,
+        "num_trunks": 1.0,
+        "optical_paths": [
+          {
+            "path_id": 0,
+            "hops": [
+              {
+                "source": 6,
+                "target": 2,
+                "trunks": 1.0,
+                "slot_start": 0
+              },
+              {
+                "source": 2,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 4,
+        "target": 5,
+        "num_trunks": 1.0,
+        "optical_paths": [
+          {
+            "path_id": 0,
+            "hops": [
+              {
+                "source": 1,
+                "target": 7,
+                "trunks": 1.0,
+                "slot_start": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 5,
+        "target": 2,
+        "num_trunks": 2.0,
+        "optical_paths": [
+          {
+            "path_id": 1,
+            "hops": [
+              {
+                "source": 7,
+                "target": 5,
+                "trunks": 1.0,
+                "slot_start": 0
+              },
+              {
+                "source": 5,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 0
+              }
+            ]
+          },
+          {
+            "path_id": 6,
+            "hops": [
+              {
+                "source": 7,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 1,
+                "target": 4,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 4,
+                "target": 9,
+                "trunks": 1.0,
+                "slot_start": 45
+              },
+              {
+                "source": 9,
+                "target": 0,
+                "trunks": 1.0,
+                "slot_start": 45
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "source": 5,
+        "target": 4,
+        "num_trunks": 2.0,
+        "optical_paths": [
+          {
+            "path_id": 0,
+            "hops": [
+              {
+                "source": 7,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 1
+              },
+              {
+                "source": 7,
+                "target": 1,
+                "trunks": 1.0,
+                "slot_start": 69
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "lightpaths": [
+      {
+        "id": 0,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          0,
+          1,
+          7,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 43,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 1,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          4,
+          1,
+          7,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 23,
+        "slots": 1,
+        "path_id": 7
+      },
+      {
+        "id": 2,
+        "ip_link": [
+          0,
+          1
+        ],
+        "opt_path": [
+          9,
+          0,
+          1,
+          4,
+          5,
+          2,
+          6,
+          3
+        ],
+        "slot_start": 68,
+        "slots": 1,
+        "path_id": 9
+      },
+      {
+        "id": 3,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          5,
+          7
+        ],
+        "slot_start": 3,
+        "slots": 1,
+        "path_id": 4
+      },
+      {
+        "id": 4,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          0,
+          5,
+          7
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 4
+      },
+      {
+        "id": 5,
+        "ip_link": [
+          0,
+          5
+        ],
+        "opt_path": [
+          9,
+          4,
+          5,
+          2,
+          7
+        ],
+        "slot_start": 45,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 6,
+        "ip_link": [
+          1,
+          0
+        ],
+        "opt_path": [
+          3,
+          6,
+          2,
+          8,
+          0,
+          9
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 2
+      },
+      {
+        "id": 7,
+        "ip_link": [
+          2,
+          0
+        ],
+        "opt_path": [
+          0,
+          9
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 8,
+        "ip_link": [
+          2,
+          0
+        ],
+        "opt_path": [
+          0,
+          9
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 9,
+        "ip_link": [
+          3,
+          5
+        ],
+        "opt_path": [
+          6,
+          2,
+          7
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 10,
+        "ip_link": [
+          4,
+          5
+        ],
+        "opt_path": [
+          1,
+          7
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 11,
+        "ip_link": [
+          5,
+          2
+        ],
+        "opt_path": [
+          7,
+          5,
+          0
+        ],
+        "slot_start": 0,
+        "slots": 1,
+        "path_id": 1
+      },
+      {
+        "id": 12,
+        "ip_link": [
+          5,
+          2
+        ],
+        "opt_path": [
+          7,
+          1,
+          4,
+          9,
+          0
+        ],
+        "slot_start": 45,
+        "slots": 1,
+        "path_id": 6
+      },
+      {
+        "id": 13,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          1
+        ],
+        "slot_start": 1,
+        "slots": 1,
+        "path_id": 0
+      },
+      {
+        "id": 14,
+        "ip_link": [
+          5,
+          4
+        ],
+        "opt_path": [
+          7,
+          1
+        ],
+        "slot_start": 69,
+        "slots": 1,
+        "path_id": 0
+      }
+    ],
+    "demand_routes": [
+      {
+        "demand_id": "d0",
+        "source": 4,
+        "target": 1,
+        "ip_hops": [
+          {
+            "source": 0,
+            "target": 1,
+            "bandwidth": 22.0
+          },
+          {
+            "source": 2,
+            "target": 0,
+            "bandwidth": 22.0
+          },
+          {
+            "source": 4,
+            "target": 5,
+            "bandwidth": 22.0
+          },
+          {
+            "source": 5,
+            "target": 2,
+            "bandwidth": 22.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d1",
+        "source": 1,
+        "target": 0,
+        "ip_hops": [
+          {
+            "source": 1,
+            "target": 0,
+            "bandwidth": 21.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d2",
+        "source": 1,
+        "target": 0,
+        "ip_hops": [
+          {
+            "source": 1,
+            "target": 0,
+            "bandwidth": 54.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d3",
+        "source": 4,
+        "target": 2,
+        "ip_hops": [
+          {
+            "source": 4,
+            "target": 5,
+            "bandwidth": 24.0
+          },
+          {
+            "source": 5,
+            "target": 2,
+            "bandwidth": 24.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d4",
+        "source": 0,
+        "target": 5,
+        "ip_hops": [
+          {
+            "source": 0,
+            "target": 5,
+            "bandwidth": 99.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d5",
+        "source": 0,
+        "target": 1,
+        "ip_hops": [
+          {
+            "source": 0,
+            "target": 1,
+            "bandwidth": 79.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d6",
+        "source": 2,
+        "target": 1,
+        "ip_hops": [
+          {
+            "source": 0,
+            "target": 1,
+            "bandwidth": 91.0
+          },
+          {
+            "source": 2,
+            "target": 0,
+            "bandwidth": 91.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d7",
+        "source": 3,
+        "target": 4,
+        "ip_hops": [
+          {
+            "source": 3,
+            "target": 5,
+            "bandwidth": 46.0
+          },
+          {
+            "source": 5,
+            "target": 4,
+            "bandwidth": 46.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d8",
+        "source": 5,
+        "target": 2,
+        "ip_hops": [
+          {
+            "source": 5,
+            "target": 2,
+            "bandwidth": 57.0
+          }
+        ]
+      },
+      {
+        "demand_id": "d9",
+        "source": 0,
+        "target": 4,
+        "ip_hops": [
+          {
+            "source": 0,
+            "target": 5,
+            "bandwidth": 100.0
+          },
+          {
+            "source": 5,
+            "target": 4,
+            "bandwidth": 100.0
+          }
+        ]
+      }
+    ]
+  }
+}

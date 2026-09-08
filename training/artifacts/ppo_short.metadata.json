@@ -1,0 +1,26 @@
+{
+  "algorithm": "MaskablePPO",
+  "pure_rl": true,
+  "uses_sa_or_lns": false,
+  "timesteps": 2048,
+  "demand_points": [
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    15,
+    18,
+    20,
+    25,
+    30,
+    40,
+    50
+  ],
+  "max_demands": 50,
+  "k_paths": 5,
+  "max_steps": 24,
+  "seed": 42,
+  "checkpoint": "training\\artifacts\\ppo_short.zip"
+}

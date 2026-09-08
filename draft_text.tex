@@ -1,0 +1,518 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{verbatim}
+\usepackage{orcidlink}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newcommand{\Huy}[1]{\noindent{\color{red}[\textsc{Huy:} #1]}}
+\newcommand{\Tung}[1]{\noindent{\color{blue}[\textsc{Tung:} #1]}}
+\newcommand{\Chien}[1]{\noindent{\color{cyan}[\textsc{Chien:} #1]}}
+
+% --- B
+\def \bw {b}
+
+% -- F
+\def \FrequencySlots {F}
+
+% --- H
+\def \HG {\mathcal{H}}
+
+% --- L
+\def \Links {\mathcal{E}}
+
+% --- I
+\def \IP {\text{IP}}
+
+% --- N
+\def \Nodes {\mathcal{N}}
+
+% --- O
+\def \Optical {\text{Opt}}
+
+% --- U
+\def \Users {\mathcal{U}}
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+\title{Physically Aware Multi-Layer Reoptimization for IP-over-Elastic Optical Networks}
+
+\author{\IEEEauthorblockN{Quang Huy Duong\IEEEauthorrefmark{1}\orcidlink{0000-0002-3096-7314}, \textit{Member, IEEE},
+Dinh Hung Duong, Anh Duc Nguyen, Dinh Thanh Tung, and Trinh Van Chien}
+\IEEEauthorblockA{School of Information and Communications Technology\\
+Hanoi University of Science and Technology\\
+Hanoi, Vietnam\\
+\IEEEauthorrefmark{1}Corresponding author: huy.duongquang@hust.edu.vn}
+}
+
+\maketitle
+
+\begin{abstract}
+Multi-layer reoeptimization is essential for adapting backbone networks to dynamic traffic demands, but many existing models simplify the optical layer and ignore physical feasibility constraints. This paper studies an IP-over-elastic-optical-network (IP-over-EON) reoptimization problem that jointly considers IP-layer routing, optical lightpath provisioning, spectrum-slot assignment, and bounded reconfiguration. We first formulate the problem as an integer linear programming model that minimizes a weighted combination of optical resource cost and routing-delay cost while enforcing flow conservation, link-capacity, spectrum non-overlap, fiber-capacity, and reconfiguration constraints. To obtain high-quality solutions with lower computational effort, we further develop a penalty-based simulated annealing algorithm that explores multilayer configurations and penalizes violations of routing, capacity, spectrum, and reconfiguration constraints. Experimental results on a representative IP-over-EON topology show that the proposed heuristic consistently reduces the total cross-layer cost compared with the initial allocation and maintains stable normalized cost under increasing traffic load. The results demonstrate the benefit of physically aware multilayer reoptimization for improving resource efficiency while limiting disruptive network changes.
+\end{abstract}
+
+% ---
+% ---
+% ---
+\section{Introduction}
+\label{sec:introduction}
+The rapid growth of cloud services, video streaming, distributed computing, and data-intensive applications has placed increasing pressure on backbone networks. Network operators must continuously adapt their infrastructures to time-varying traffic demands while maintaining high resource utilization, low congestion, and reliable service delivery. In this context, multi-layer network optimization has become an important problem, since routing decisions at the IP layer directly determine the capacity requirements and physical feasibility of the underlying optical transport layer.
+
+Elastic optical networks (EONs) provide a flexible substrate for such adaptation by allocating spectrum resources according to the bandwidth requirements of individual lightpaths. Compared with fixed-grid wavelength-division multiplexing systems, EONs can improve spectral efficiency through fine-grained frequency-slot allocation and variable-width optical channels. However, this flexibility also introduces additional physical constraints, including spectrum contiguity, spectrum continuity, guardband separation, fiber spectrum capacity, transceiver availability, and reconfigurable optical add-drop multiplexer (ROADM) limitations. These constraints make the joint optimization of IP routing and optical resource allocation significantly more challenging than optimizing either layer independently.
+
+Many existing studies on multi-layer reoptimization focus mainly on logical topology design, IP-layer traffic engineering, or lightpath provisioning while abstracting the optical layer as a simple capacity graph. Although such abstractions reduce modeling complexity, they often skip the challenging physical constraints that determine whether a planned set of lightpaths can actually be deployed in an EON. As a result, an optimization solution that appears feasible at the logical layer may violate spectrum continuity, overlap, guardband, or node-capacity requirements in the physical layer. This gap motivates the development of models that jointly capture both traffic-engineering objectives and physical-layer feasibility.
+
+In this paper, we present an integer linear programming (ILP) formulation for multi-layer reoptimization in an IP-over-EON architecture. The proposed model jointly optimizes IP-layer routing, optical lightpath establishment, candidate optical path selection, and temporal reconfiguration decisions. Unlike simplified formulations, our model explicitly incorporates key EON constraints, including spectrum contiguity and continuity, non-overlap, guardband requirements, fiber spectrum capacity, transceiver constraints, and ROADM capacity. We also include reconfiguration constraints that limit the fraction of IP links whose capacities can be changed between consecutive time periods, thereby supporting demand-aware adaptation while controlling operational disruption.
+
+The main contribution of this work is a unified ILP framework that connects IP-layer reoptimization with physically constrained EON resource allocation. By considering both logical and physical layers in a single formulation, the proposed model provides a realistic benchmark for studying the trade-off among resource efficiency, optical-layer feasibility, and reconfiguration cost in multi-layer transport networks.
+
+The rest of the paper is organized as follows. Section~\ref{sec:related-work} reviews related work on multi-layer traffic engineering, EON resource allocation, and reconfiguration-aware optimization. Section~\ref{sec:system-problem} presents the system setting and problem statement. Section~\ref{sec:formulation} introduces the mathematical formulation, including the objective function, decision variables, and constraints. Section~\ref{sec:sa} describes the penalty-based simulated annealing algorithm used to obtain high-quality solutions. Section~\ref{sec:evaluation} reports the experimental evaluation, and Section~\ref{sec:conclusion} concludes the paper.
+
+% ---
+% ---
+% ---
+\section{Related Works}
+\label{sec:related-work}
+
+This section reviews prior studies related to the proposed multi-layer reoptimization model. We first discuss traffic-engineering approaches at the IP and logical layers, then summarize resource-allocation methods for elastic optical networks, and finally review reconfiguration-aware optimization mechanisms. This organization highlights the gap between existing logical-layer optimization models and physically constrained IP-over-EON reoptimization.
+
+\subsection{Multi-Layer Traffic Engineering}
+
+Multi-layer traffic engineering has become essential for adapting backbone networks to dynamic, high-bandwidth demand. Traditional Internet Service Provider (ISP) backbones rely on relatively static physical topologies and routing protocols, where traffic engineering is often limited to link-weight adjustment and therefore cannot fully respond to large spatial traffic shifts. To address this limitation, recent works have explored demand-aware and cross-layer optimization frameworks. Zerwas et al. \cite{9566292} proposed a mixed-integer programming (MIP) model for CDN-ISP collaboration that jointly assigns users to CDN Points of Presence (PoPs) and reconfigures IP-layer routing, reducing required backbone capacity.
+
+Related studies have extended traffic engineering to other application scenarios. Chiang et al. \cite{10453465} used multicast and view synthesis in Software-Defined CDNs to reduce bandwidth consumption, while Mao et al. \cite{11007327} optimized traffic-sensitive Service Function Chain (SFC) deployment with respect to resource cost and latency. Despite these advances, many multi-layer frameworks \cite{9566292}, \cite{10453465} still simplify the optical layer by treating lightpaths as fixed-capacity logical pipes. Such abstractions overlook the discreteness of transceivers and the spectrum-related physical constraints imposed by modern optical hardware, motivating the physically aware formulation considered in this work.
+
+\subsection{Elastic Optical Network Resource Allocation}
+
+Elastic Optical Networks (EONs), enabled by flex-grid technologies, address the limitations of fixed-grid optical systems by dividing the spectrum into fine-grained frequency slots. Earlier cross-layer studies, such as Wu et al. \cite{Wu2015ACO}, optimized power consumption in IP-over-WDM networks but remained constrained by fixed-grid operation. In contrast, EONs support more flexible spectrum allocation \cite{10520496}, but a feasible lightpath must satisfy strict physical constraints, especially spectrum contiguity and spectrum continuity across all fibers on its route \cite{10005186}.
+
+These constraints make exact EON resource allocation difficult. Traditional MIP formulations often require multi-dimensional auxiliary variables to track slot usage and contiguity on each link, causing state-space growth and poor scalability \cite{10005186}. To avoid this complexity, learning-based methods such as the hierarchical reinforcement learning approach of Xu et al. \cite{10011542} have been proposed for dynamic routing, modulation, and spectrum assignment (RMSA). For exact optimization, recent formulations use the ``Sliding Window'' technique \cite{10855998}, which represents the starting slot of a contiguous block and reduces RSA complexity. Ouyang et al. \cite{10855998} further extended MILP models to hybrid fiber types and modulation formats under static and dynamic traffic, but these models mainly focus on the optical layer and do not jointly capture IP-layer traffic engineering.
+
+\subsection{Network Reoptimization}
+Network reoptimization extends multi-layer resource allocation by allowing the logical topology and routing configuration to adapt over time. In IP-over-optical networks, centralized control can modify optical lightpaths in response to changes in the IP traffic matrix, improving resource utilization and reducing congestion. Garrich et al. \cite{9133026} presented a multi-layer framework that jointly optimizes datacenter IT resources, IP routing, and optical-layer resources. Assis et al. \cite{10994541} further studied reconfiguration in Network Function Virtualization through a two-stage mechanism that reduces the operational cost of service migration.
+
+Despite these benefits, frequent or large-scale reconfiguration may introduce control-plane overhead, transient packet loss, and service disruption. Therefore, practical reoptimization models must limit the number of network changes and account for operational stability. Wang et al. \cite{11248858} investigated bounded topology reconfiguration in dynamic maritime networks, showing the importance of constraining updates to maintain long-term performance. In addition, Make-Before-Break (MBB) mechanisms are commonly used to avoid disruption during topology updates. Duong et al. \cite{9462438} showed that MBB enables hitless layer-2 reoptimization by establishing the new lightpath and shifting traffic before removing the old connection. These studies motivate incorporating explicit reconfiguration limits into the proposed IP-over-EON optimization model.
+
+%================================================
+\section{System Settings and Problem Statement}
+\label{sec:system-problem}
+
+The considered system is an IP-over-EON multilayer network consisting of an IP logical layer and an optical physical layer.
+
+The IP layer is represented by a directed graph
+\begin{equation}
+    G^{IP} = \left(V^{IP}, E^{IP}\right),
+\end{equation}
+where $V^{IP}$ is the set of IP routers and $E^{IP}$ is the set of logical IP links.
+
+The optical layer is represented by a directed graph
+\begin{equation}
+    G^{Opt} = \left(V^{Opt}, E^{fiber}\right),
+\end{equation}
+where $V^{Opt}$ is the set of optical/ROADM nodes and $E^{fiber}$ is the set of physical fiber links.
+
+Each IP router is mapped to one optical node by the mapping function
+\begin{equation}
+    \phi: V^{IP} \rightarrow V^{Opt}.
+\end{equation}
+For an IP link $(u,v)\in E^{IP}$, the corresponding optical connection must start from $\phi(u)$ and terminate at $\phi(v)$. Each IP link can be supported by one or more lightpaths. Each lightpath is routed over an optical path and assigned a spectrum slot.
+
+Main parameters of the system settings are presented in Table \ref{tab:parameters}
+\begin{table}[t]
+\caption{Sets and Indices}
+\label{tab:parameters}
+\centering
+\begin{tabularx}{\columnwidth}{L{0.2\columnwidth}Y}
+\toprule
+\textbf{Symbol} & \textbf{Description} \\
+\midrule
+$D$ & Set of traffic demands \\
+$d \in D$ & Index of a traffic demand \\
+$V^{IP}$ & Set of IP routers/nodes \\
+$V^{Opt}$ & Set of optical/ROADM nodes \\
+$E^{IP}$ & Set of logical IP links \\
+$E^{fiber}$ & Set of physical fiber links \\
+$P_{uv}$ & Candidate optical paths supporting IP link $(u,v)$ \\
+$\alpha_{p}^e$ & 1 if physical link $e$ is on optical path $p$ \\
+$L$ & Set of established lightpaths \\
+$\ell \in L$ & Index of a lightpath \\
+$W$ & Number of spectrum slots on each fiber \\
+$S_d$ & Source IP node of demand $d$ \\
+$T_d$ & Destination IP node of demand $d$ \\
+$b_d$ & Bandwidth requirement of demand $d$ \\
+$C$ & Capacity of one lightpath \\
+% $delay_{uv}$ & Delay/weight of IP link $(u,v)$ \\
+$delay_{p}$ & Delay/weight of optical path $p$ \\
+$p^{trans}$ & Energy cost of one transponder/lightpath \\
+$\alpha$ & Weight of energy cost \\
+$\beta$ & Weight of delay cost \\
+$\rho$ & Maximum allowed reconfiguration distance \\
+$y^{0}_{uv,p}$ & Number of lightpaths in the initial state \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Given the IP topology, the optical fiber topology, the IP-to-optical node mapping, and a traffic demand matrix, the problem is to determine a multilayer network configuration that serves all demands while minimizing the total operating cost. Specifically, the model must select an IP route for each demand, decide how many lightpaths are established on each logical IP link, choose the optical path and spectrum slot used by each lightpath, and ensure that the resulting configuration satisfies both IP-layer and optical-layer feasibility constraints.
+
+The problem also considers reoptimization from an initial network state. Instead of designing the network from scratch, the objective is to adapt the existing lightpath configuration to the current traffic matrix while limiting the amount of reconfiguration. This restriction reflects practical operational requirements, since excessive changes to established lightpaths may introduce control-plane overhead, transient service disruption, or additional coordination cost. Therefore, the desired solution must balance three goals: reducing optical resource usage, improving traffic routing efficiency, and keeping the new configuration sufficiently close to the initial state.
+
+\section{Mathematical Formulation}
+\label{sec:formulation}
+
+
+% \subsection{Sets and Indices}
+
+
+
+% \subsection{Parameters}
+
+% \begin{table}[t]
+% \caption{Parameters}
+% \label{tab:parameters}
+% \centering
+% \begin{tabularx}{\columnwidth}{L{0.24\columnwidth}Y}
+% \toprule
+% \textbf{Symbol} & \textbf{Description} \\
+% \midrule
+% $S_d$ & Source IP node of demand $d$ \\
+% $T_d$ & Destination IP node of demand $d$ \\
+% $b_d$ & Bandwidth requirement of demand $d$ \\
+% $C$ & Capacity of one lightpath \\
+% $delay_{uv}$ & Delay/weight of IP link $(u,v)$ \\
+% $p^{trans}$ & Energy cost of one transponder/lightpath \\
+% $\alpha$ & Weight of energy cost \\
+% $\beta$ & Weight of delay cost \\
+% $\rho$ & Maximum allowed reconfiguration distance \\
+% $y^{0}_{uv,p}$ & Number of lightpaths in the initial state \\
+% \bottomrule
+% \end{tabularx}
+% \end{table}
+
+\subsection{Decision Variables}
+
+The decision variables determine the IP routing, lightpath provisioning, and spectrum-slot assignment of the multilayer configuration. They are summarized in Table~\ref{tab:variables}.
+
+\begin{table}[t]
+\caption{Decision Variables}
+\label{tab:variables}
+\centering
+\begin{tabularx}{\columnwidth}{L{0.2\columnwidth}Y}
+\toprule
+\textbf{Variable} & \textbf{Description} \\
+\midrule
+$x^{d}_{uv}\in\{0,1\}$ & Equals 1 if demand $d$ is routed over IP link $(u,v)$, and 0 otherwise \\
+$y_{uv,p}\in\mathbb{N}_{0}$ & Number of lightpaths established for IP link $(u,v)$ on candidate optical path $p\in P_{uv}$ \\
+$z_{uv}^{p,s}\in\{0,1\}$ & Equals 1 if a lightpath for IP link $(u,v)$ uses optical path $p$ and spectrum slot $s$, and 0 otherwise \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+In the current implementation, each lightpath occupies one spectrum slot. Therefore, the spectrum assignment is represented directly by $z_{uv}^{p,s}$, and no separate slot-width variable is required.
+
+% ---
+\subsection{Objective Function}
+
+The optimization objective is to minimize the cross-layer operating cost of the IP-over-EON configuration, this cost includes the optical resource cost:
+\begin{equation}
+ \min \quad E_{cost},
+\end{equation}
+where the energy/resource cost is proportional to the number of established lightpaths. It is defined as
+\begin{equation}
+    E_{cost}
+    = p^{trans}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    y_{uv,p},
+    \label{eq:energy}
+\end{equation}
+where $p^{trans}$ denotes the cost of activating one transponder or lightpath. Minimizing this term encourages the model to use fewer optical resources.
+
+% \begin{equation}
+%     \min J = \alpha E_{cost} + \beta D_{cost},
+%     \label{eq:objective}
+% \end{equation}
+% where $\alpha$ and $\beta$ control the relative importance of resource usage and routing delay, respectively.
+
+
+
+% The delay cost captures the traffic-weighted routing cost at the IP layer:
+% % \begin{equation}
+% %     D_{cost}
+% %     =
+% %     \sum_{d\in D}
+% %     \sum_{(u,v)\in E^{IP}}
+% %     b_d x^{d}_{uv} delay_{uv},
+% %     \label{eq:delay}
+% % \end{equation}
+% \begin{equation}
+%     D_{cost}
+%     =
+%     \sum_{d\in D}
+%     \sum_{(u,v)\in E^{IP}}
+%     \sum_{p \in P_{uv}}
+%     \sum_{s \in S}
+%     delay_{p} z_{uv}^{ps},
+%     \label{eq:delay}
+% \end{equation}
+% where the delay of an optical path is propotional to its physical distance.
+% This term indirectly penalizes routing large traffic demands over high-delay or high-weight IP links.
+
+% ---
+% ---
+% ---
+\subsection{Constraints}
+
+\textbf{Flow Conservation.} For each demand $d\in D$ and node $u\in V^{IP}$, the selected IP route must originate at source node $S_d$ and terminate at destination node $T_d$. This is enforced by the standard flow-balance constraint
+\begin{equation}
+    \sum_{v:(u,v)\in E^{IP}} x^{d}_{uv}
+    -
+    \sum_{v:(v,u)\in E^{IP}} x^{d}_{vu}
+    =
+    \begin{cases}
+        1, & u = S_d,\\
+       -1, & u = T_d,\\
+        0, & \text{otherwise.}
+    \end{cases}
+    \label{eq:flow}
+\end{equation}
+
+\textbf{Single-Path Routing.} Each demand is restricted to at most one outgoing link at every IP node, which enforces single-path routing together with the flow-conservation constraint:
+\begin{equation}
+    \sum_{v:(u,v)\in E^{IP}} x^{d}_{uv} \leq 1,
+    \quad \forall d\in D,\; \forall u\in V^{IP}.
+    \label{eq:single-path}
+\end{equation}
+
+\textbf{IP Link Capacity.} The total traffic routed over a logical IP link cannot exceed the capacity provided by the lightpaths established for that link:
+\begin{equation}
+    \sum_{d\in D} b_d x^{d}_{uv}
+    \leq
+    C \sum_{p\in P_{uv}} y_{uv,p},
+    \quad \forall (u,v)\in E^{IP}.
+    \label{eq:capacity}
+\end{equation}
+
+\textbf{Lightpath Assignment.} The number of lightpaths established for IP link $(u,v)$ on optical path $p$ is equal to the number of spectrum slots selected for that path:
+\begin{equation}
+    y_{uv,p} = \sum_{s=1}^{W} z_{uv}^{p,s},
+    \quad \forall (u,v)\in E^{IP},\; \forall p\in P_{uv}.
+    \label{eq:lightpath-assignment}
+\end{equation}
+
+\textbf{Spectrum-Slot Assignment.} The binary variable $z_{uv}^{p,s}$ indicates whether a lightpath supporting IP link $(u,v)$ is routed on optical path $p$ and assigned spectrum slot $s$. Hence, an assigned lightpath must use exactly one feasible spectrum slot:
+\begin{equation}
+    z_{uv}^{p,s} \in \{0,1\},
+    \quad \forall (u,v)\in E^{IP},\; \forall p\in P_{uv},\; \forall s \in W.
+    \label{eq:z-domain-local}
+\end{equation}
+
+\textbf{Spectrum Non-Overlapping.} Two lightpaths traversing the same fiber link cannot occupy the same spectrum slot. Therefore, each slot on each physical fiber can be assigned to at most one lightpath:
+\begin{equation}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    \alpha_{p}^{e} z_{uv}^{p,s}
+    \leq 1,
+    \quad \forall e\in E^{fiber},\; \forall s \in W.
+    \label{eq:spectrum-nonoverlap}
+\end{equation}
+
+\textbf{Fiber Capacity.} The total number of lightpaths using a physical fiber cannot exceed the number of available spectrum slots on that fiber:
+\begin{equation}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    \sum_{s=1}^{W}
+    \alpha_{p}^{e} z_{uv}^{p,s}
+    \leq W,
+    \quad \forall e\in E^{fiber}.
+    \label{eq:fiber-capacity}
+\end{equation}
+
+\textbf{Bounded Reconfiguration.} To avoid excessive service disruption, the new lightpath configuration is constrained to remain close to the initial configuration. The reconfiguration distance is bounded by $\rho$ as follows:
+\begin{equation}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    \left|y_{uv,p} - y^{0}_{uv,p}\right|
+    \leq \rho.
+    \label{eq:non-disruptive}
+\end{equation}
+
+% ---
+% ---
+% ---
+\section{Simulated Annealing Algorithm}
+\label{sec:sa}
+
+Solving the proposed cross-layer optimization problem exactly can be computationally expensive because IP routing, lightpath provisioning, and spectrum assignment are tightly coupled. Therefore, we employ a penalty-based simulated annealing (SA) algorithm to search for high-quality solutions with controllable computational effort. The SA procedure explores both feasible and temporarily infeasible configurations, while the penalty terms gradually guide the search toward solutions that satisfy the routing, capacity, spectrum, and reconfiguration constraints.
+
+\subsection{State and Cost Presentaion}
+A multilayer network state is represented as
+\begin{equation}
+    S = (x,y,z),
+\end{equation}
+where $x$ denotes IP routing decisions, $y$ denotes lightpath allocation on IP links, and $z$ denotes optical path and fiber-slot usage. For a given state $S$, the evaluation function is defined as
+\begin{equation}
+    \mathrm{Cost}(S) =  E_{cost} + \beta D_{cost} + \mathrm{PEN},
+    \label{eq:sa-cost}
+\end{equation}
+where $E_{cost}$ represents the resource or energy cost, $D_{cost}$ represents the routing-delay cost, and $\alpha$ and $\beta$ are weighting coefficients. The penalty term is given by
+\begin{equation}
+\begin{split}
+    \mathrm{PEN} ={}& P_{flow} + P_{capacity} + P_{spectrum} \\
+                    &+ P_{consistency} + P_{non\text{-}disruptive}.
+\end{split}
+\label{eq:penalty}
+\end{equation}
+Each component penalizes one class of constraint violation, including IP flow conservation, IP link capacity, spectrum non-overlap, lightpath consistency, and bounded reconfiguration. This design allows the algorithm to escape poor local optima through temporary infeasible moves, while still assigning a high cost to solutions that violate important network constraints.
+
+Algorithm~\ref{alg:sa} summarizes the proposed SA procedure. Starting from an initial multilayer state, the algorithm repeatedly generates a neighboring state and evaluates its penalized cost. If the neighboring state has a lower cost, it is accepted directly. Otherwise, it is accepted with probability $\exp(-\Delta/T)$, where $\Delta$ is the cost increase and $T$ is the current temperature. The temperature is gradually reduced by the cooling factor $\gamma$, making the search more exploratory at the beginning and more selective near the end.
+
+\begin{algorithm}[t]
+\caption{Penalty-Based Simulated Annealing for Cross-Layer Optimization}
+\label{alg:sa}
+\begin{algorithmic}[1]
+\State Generate an initial multilayer state $S$
+\State Evaluate $\mathrm{Cost}(S)$ using \eqref{eq:sa-cost}
+\State $S_{best} \gets S$
+\State $T \gets T_{max}$
+\While{$T > T_{min}$}
+    \For{$i = 1$ to $N_{iter}$}
+        \State Generate a neighbor state $S'$ from $S$
+        \State Evaluate $\mathrm{Cost}(S')$ using \eqref{eq:sa-cost}
+        \State $\Delta \gets \mathrm{Cost}(S') - \mathrm{Cost}(S)$
+        \If{$\Delta < 0$}
+            \State $S \gets S'$
+        \Else
+            \State Generate $r\sim U(0,1)$
+            \If{$\exp(-\Delta/T) > r$}
+                \State $S \gets S'$
+            \EndIf
+        \EndIf
+        \If{$\mathrm{Cost}(S) < \mathrm{Cost}(S_{best})$}
+            \State $S_{best} \gets S$
+        \EndIf
+    \EndFor
+    \State $T \gets \gamma T$
+\EndWhile
+\State \Return $S_{best}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Neighbor Operations}
+
+Neighboring states are generated by applying one local modification to the current multilayer configuration. We use the following operations:
+\begin{itemize}
+    \item \textbf{Reroute an IP demand:} select one demand and replace its current IP route with another candidate path.
+    \item \textbf{Add a lightpath:} add one lightpath to an IP link, preferably a link whose carried traffic is close to or above its installed capacity.
+    \item \textbf{Remove a lightpath:} remove one existing lightpath to reduce resource cost, while relying on penalty terms to avoid severe capacity or spectrum violations.
+\end{itemize}
+These local moves modify either the IP layer or the optical layer, enabling the algorithm to explore cross-layer trade-offs between routing cost, optical resource usage, and reconfiguration effort.
+
+
+% ---
+% ---
+% ---
+\section{Experimental Evaluation}
+\label{sec:evaluation}
+
+\noindent The experiments are conducted on a small IP-over-EON topology to evaluate the behavior of the proposed simulated annealing method. The optical layer contains 10 nodes and 14 fiber links, while the IP layer contains 6 routers and 8 logical links. Each fiber provides 100 spectrum slots, and each established lightpath contributes 80 units of capacity. The traffic matrix consists of increasing number of demands, with bandwidth requirements uniformly generated between 10 and 100 Gbps.
+
+The objective function combines energy and latency costs with penalty terms for constraint violations. The energy and latency weights are set to 1.0 and 0.001, respectively, and the cost of one transponder/lightpath is set to 10000. Large penalty coefficients are used to discourage infeasible solutions, including flow-conservation, capacity, spectrum, lightpath-consistency, and non-disruptive reconfiguration violations. The simulated annealing procedure starts from an initial temperature of 1000, stops at a minimum temperature of 1, uses a cooling rate of 0.95, and performs 80 iterations at each temperature level. The reconfiguration budget is limited by $\rho = 10$.
+
+\begin{table}[t]
+\centering
+\caption{Experimental Parameters}
+\label{tab:experimental-parameters}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Optical nodes / fiber links & 10 / 14 \\
+IP nodes / logical links & 6 / 8 \\
+Spectrum slots per fiber & 100 \\
+Lightpath capacity & 80 \\
+Number of demands & 8 \\
+Demand bandwidth range & 10--100 \\
+Energy / latency weights & 1.0 / 0.001 \\
+Transponder cost & 10000 \\
+Initial / final temperature & 1000 / 1 \\
+Cooling rate & 0.95 \\
+Iterations per temperature & 80 \\
+Reconfiguration budget $\rho$ & 10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The initial solution is generated in two stages. First, each traffic demand is assigned to one IP route selected randomly from its candidate $k$-shortest paths. Then, for each IP link used by the selected routes, the required lightpaths are initialized by randomly selecting candidate optical paths from the corresponding $k$-shortest path set. This initialization provides a feasible starting point.
+
+We evaluate the algorithm under increasing traffic loads. For each demand level, the initial allocation is compared with the best solution returned by simulated annealing using the following metrics:
+\begin{itemize}
+    \item \textbf{Initial cost:} the objective value of the initial multilayer allocation before optimization.
+    \item \textbf{Optimized cost:} the best objective value obtained after simulated annealing.
+    \item \textbf{Normalized cost:} the cost per unit of carried demand, defined as
+    \begin{equation}
+        \mathrm{NormalizedCost} = \frac{\mathrm{Cost}}{\sum_{d\in D} b_d}.
+    \end{equation}
+    \item \textbf{Improvement ratio:} the relative reduction from the initial cost to the optimized cost, defined as
+    \begin{equation}
+        % \mathrm{Improvement} =
+        \frac{\mathrm{InitialCost} - \mathrm{OptimizedCost}}
+        {\mathrm{InitialCost}}\times 100\%.
+    \end{equation}
+\end{itemize}
+The normalized cost enables fair comparison across scenarios with different traffic volumes, while the improvement ratio quantifies the effectiveness of the proposed search procedure.
+
+Fig.~\ref{fig:total-cost} compares the total cost before and after simulated annealing. As the number of demands increases, both costs increase because more IP and optical resources are required. However, the optimized solution consistently achieves a lower total cost than the initial allocation, showing that the proposed method can improve resource usage under heavier traffic loads.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/01_initial_vs_sa_total_cost.png}
+    \caption{Total cost comparison between the initial allocation and the simulated annealing solution.}
+    \label{fig:total-cost}
+\end{figure}
+
+Fig.~\ref{fig:improvement-percent} reports the improvement percentage. The result shows a stable reduction of approximately 60\%, indicating that the simulated annealing procedure provides consistent gains across the tested demand levels.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/03_improvement_percent.png}
+    \caption{Relative cost improvement achieved by simulated annealing.}
+    \label{fig:improvement-percent}
+\end{figure}
+
+Fig.~\ref{fig:normalized-cost} shows the normalized cost. The curve becomes relatively flat as the demand level increases, suggesting that the optimized solution scales more smoothly with traffic volume and maintains a stable cost per unit bandwidth.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/02_initial_vs_sa_normalized_cost.png}
+    \caption{Normalized cost under increasing traffic demand.}
+    \label{fig:normalized-cost}
+\end{figure}
+
+
+% ---
+% ---
+% ---
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper presented a multi-layer reoptimization framework for IP-over-EON networks. The proposed formulation jointly captures IP-layer routing, optical lightpath assignment, spectrum-slot allocation, and bounded reconfiguration. By explicitly considering physical-layer constraints such as spectrum non-overlap, fiber capacity, and lightpath consistency, the model avoids the overly simplified optical abstractions commonly used in logical-layer optimization.
+
+To complement the exact formulation, we developed a penalty-based simulated annealing algorithm that searches over multilayer configurations while accounting for constraint violations through penalty terms. The experimental results show that the proposed heuristic consistently reduces the total cross-layer cost compared with the initial allocation and maintains a stable normalized cost as traffic demand increases. These results demonstrate the potential of demand-aware multilayer reoptimization to improve resource efficiency while limiting disruptive network changes.
+
+Future work will extend the model to larger topologies, richer EON constraints such as modulation-format selection and guardband-aware spectrum allocation, and more detailed reconfiguration mechanisms that explicitly capture make-before-break operations and transient service impacts.
+
+% Bibliography
+\bibliographystyle{IEEEtran}
+\bibliography{Biblio/ILP,Biblio/lp,Biblio/5G,Biblio/cross_layer_opti}
+
+
+\end{document}

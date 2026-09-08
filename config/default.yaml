@@ -1,0 +1,35 @@
+random_seed: 42
+
+network:
+  opt_nodes: 10
+  opt_links: 14
+  ip_nodes: 6
+  ip_links: 8
+  num_slots: 70
+  lightpath_capacity: 80
+
+demands:
+  num_demands: 110
+  bw_min: 20
+  bw_max: 100
+
+initialization:
+  k_shortest: 10
+
+objective:
+  weight_energy: 1.0
+  weight_latency: 0.0
+  p_transponder: 1
+
+  penalty_flow: 0
+  penalty_capacity: 0
+  penalty_spectrum: 0
+  penalty_lightpath_consistency: 0
+  penalty_non_disruptive: 0
+
+sa:
+  T_max: 1500.0
+  T_min: 1.0
+  cooling_rate: 0.95
+  iterations_per_temperature: 120
+  rho_limit: 35

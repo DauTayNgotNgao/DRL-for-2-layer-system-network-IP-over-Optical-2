@@ -1,0 +1,367 @@
+\documentclass[journal,10pt]{IEEEtran}
+
+% =========================================================
+% Recommended compiler: pdfLaTeX on Overleaf
+% If Vietnamese fonts fail, switch to XeLaTeX and replace
+% inputenc/fontenc/babel with fontspec + polyglossia.
+% =========================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese,english]{babel}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{cite}
+\usepackage[hidelinks]{hyperref}
+\usepackage{balance}
+
+% -----------------------------
+% Compact IEEE-like formatting
+% -----------------------------
+\setlength{\textfloatsep}{8pt plus 1pt minus 2pt}
+\setlength{\floatsep}{7pt plus 1pt minus 2pt}
+\setlength{\intextsep}{7pt plus 1pt minus 2pt}
+\setlength{\abovedisplayskip}{5pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{5pt plus 1pt minus 1pt}
+\setlength{\abovedisplayshortskip}{4pt plus 1pt minus 1pt}
+\setlength{\belowdisplayshortskip}{4pt plus 1pt minus 1pt}
+\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=2pt}
+\renewcommand{\arraystretch}{1.12}
+
+% Table column helpers
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+\title{Cross-Layer IP-over-EON Optimization Using Simulated Annealing}
+
+\author{Quang Huy Duong, SoICT, HUST, Trinh Van Chien, and Dinh Thanh Tung%
+\thanks{This document presents the mathematical model and implementation-oriented formulation used in the cross-layer IP-over-EON optimization project.}}
+
+\markboth{Cross-Layer IP-over-EON Optimization}{Duong \MakeLowercase{\textit{et al.}}: Cross-Layer IP-over-EON Optimization}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a cross-layer optimization model for IP-over-Elastic Optical Networks (IP-over-EON). The system jointly considers IP routing, lightpath provisioning, optical path mapping, spectrum assignment, and non-disruptive reconfiguration. A penalty-based Simulated Annealing (SA) algorithm is used to minimize the combined cost of energy, delay, and constraint violations. The implementation evaluates the algorithm under different numbers of traffic demands and compares the initial allocation with the optimized solution.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Cross-layer optimization, IP-over-EON, lightpath, spectrum assignment, Simulated Annealing, non-disruptive reconfiguration.
+\end{IEEEkeywords}
+
+\section{Network Model}
+\IEEEPARstart{T}{he} considered system is an IP-over-EON multilayer network consisting of an IP logical layer and an optical physical layer.
+
+The IP layer is represented by a directed graph
+\begin{equation}
+    G^{IP} = \left(V^{IP}, E^{IP}\right),
+\end{equation}
+where $V^{IP}$ is the set of IP routers and $E^{IP}$ is the set of logical IP links.
+
+The optical layer is represented by a directed graph
+\begin{equation}
+    G^{Opt} = \left(V^{Opt}, E^{fiber}\right),
+\end{equation}
+where $V^{Opt}$ is the set of optical/ROADM nodes and $E^{fiber}$ is the set of physical fiber links.
+
+Each IP router is mapped to one optical node by the mapping function
+\begin{equation}
+    \phi: V^{IP} \rightarrow V^{Opt}.
+\end{equation}
+For an IP link $(u,v)\in E^{IP}$, the corresponding optical connection must start from $\phi(u)$ and terminate at $\phi(v)$. Each IP link can be supported by one or more lightpaths. Each lightpath is routed over an optical path and assigned a spectrum slot.
+
+\section{Mathematical Formulation}
+
+\subsection{Sets and Indices}
+
+\begin{table}[t]
+\caption{Sets and Indices}
+\label{tab:sets}
+\centering
+\begin{tabularx}{\columnwidth}{L{0.24\columnwidth}Y}
+\toprule
+\textbf{Symbol} & \textbf{Description} \\
+\midrule
+$D$ & Set of traffic demands \\
+$d \in D$ & Index of a traffic demand \\
+$V^{IP}$ & Set of IP routers/nodes \\
+$V^{Opt}$ & Set of optical/ROADM nodes \\
+$E^{IP}$ & Set of logical IP links \\
+$E^{fiber}$ & Set of physical fiber links \\
+$P_{uv}$ & Candidate optical paths supporting IP link $(u,v)$ \\
+$L$ & Set of established lightpaths \\
+$\ell \in L$ & Index of a lightpath \\
+$W$ & Number of spectrum slots on each fiber \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Parameters}
+
+\begin{table}[t]
+\caption{Parameters}
+\label{tab:parameters}
+\centering
+\begin{tabularx}{\columnwidth}{L{0.24\columnwidth}Y}
+\toprule
+\textbf{Symbol} & \textbf{Description} \\
+\midrule
+$S_d$ & Source IP node of demand $d$ \\
+$T_d$ & Destination IP node of demand $d$ \\
+$b_d$ & Bandwidth requirement of demand $d$ \\
+$C$ & Capacity of one lightpath \\
+$delay_{uv}$ & Delay/weight of IP link $(u,v)$ \\
+$p^{trans}$ & Energy cost of one transponder/lightpath \\
+$\alpha$ & Weight of energy cost \\
+$\beta$ & Weight of delay cost \\
+$\rho$ & Maximum allowed reconfiguration distance \\
+$y^{0}_{uv,p}$ & Number of lightpaths in the initial state \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Decision Variables}
+
+\begin{table}[t]
+\caption{Decision Variables}
+\label{tab:variables}
+\centering
+\begin{tabularx}{\columnwidth}{L{0.30\columnwidth}Y}
+\toprule
+\textbf{Variable} & \textbf{Description} \\
+\midrule
+$x^{d}_{uv}\in\{0,1\}$ & Equals 1 if demand $d$ uses IP link $(u,v)$ \\
+$y_{uv,p}\in\mathbb{N}_{0}$ & Number of lightpaths supporting IP link $(u,v)$ using optical path $p$ \\
+$z^{\ell}_{e}\in\{0,1\}$ & Equals 1 if lightpath $\ell$ uses fiber edge $e$ \\
+$s_{\ell}\in\{1,\ldots,W\}$ & Start spectrum slot assigned to lightpath $\ell$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+In the current implementation, each lightpath occupies one spectrum slot, i.e., $w_{\ell}=1$.
+
+\section{Objective Function}
+
+The goal is to minimize the total cross-layer cost, consisting of energy cost, delay cost, and penalties for constraint violations:
+\begin{equation}
+    \min J = \alpha E_{cost} + \beta D_{cost} + Penalty.
+    \label{eq:objective}
+\end{equation}
+
+The energy cost is proportional to the total number of established lightpaths:
+\begin{equation}
+    E_{cost}
+    = p^{trans}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    y_{uv,p}.
+    \label{eq:energy}
+\end{equation}
+
+The delay cost is weighted by demand bandwidth:
+\begin{equation}
+    D_{cost}
+    =
+    \sum_{d\in D}
+    \sum_{(u,v)\in E^{IP}}
+    b_d x^{d}_{uv} delay_{uv}.
+    \label{eq:delay}
+\end{equation}
+
+The total penalty is defined as
+\begin{equation}
+\begin{split}
+    Penalty ={}& P_{flow} + P_{capacity} + P_{spectrum} \\
+               &+ P_{consistency} + P_{non\text{-}disruptive}.
+\end{split}
+\label{eq:penalty}
+\end{equation}
+
+This penalty-based formulation matches the implementation: infeasible states are not immediately discarded but receive a large penalty in the objective function.
+
+\section{Constraints}
+
+\subsection{Flow Conservation}
+
+For each demand $d$, traffic must start at $S_d$ and terminate at $T_d$:
+\begin{equation}
+    \sum_{v:(u,v)\in E^{IP}} x^{d}_{uv}
+    -
+    \sum_{v:(v,u)\in E^{IP}} x^{d}_{vu}
+    =
+    \begin{cases}
+        1, & u = S_d,\\
+       -1, & u = T_d,\\
+        0, & \text{otherwise.}
+    \end{cases}
+    \label{eq:flow}
+\end{equation}
+
+\subsection{Single-Path Routing}
+
+Each demand is routed over a single IP path:
+\begin{equation}
+    \sum_{v:(u,v)\in E^{IP}} x^{d}_{uv} \leq 1,
+    \quad \forall d\in D,\; \forall u\in V^{IP}.
+    \label{eq:single-path}
+\end{equation}
+
+\subsection{IP Link Capacity}
+
+The total bandwidth carried by an IP link cannot exceed the capacity installed by its supporting lightpaths:
+\begin{equation}
+    \sum_{d\in D} b_d x^{d}_{uv}
+    \leq
+    C \sum_{p\in P_{uv}} y_{uv,p},
+    \quad \forall (u,v)\in E^{IP}.
+    \label{eq:capacity}
+\end{equation}
+
+\subsection{Cross-Layer Mapping}
+
+Any lightpath supporting IP link $(u,v)$ must start and end at the corresponding mapped optical nodes:
+\begin{equation}
+    start(\ell) = \phi(u),\quad end(\ell) = \phi(v),
+    \quad \forall \ell \text{ supporting } (u,v).
+    \label{eq:mapping}
+\end{equation}
+
+\subsection{Lightpath-Fiber Consistency}
+
+The variable $z^{\ell}_{e}$ must be consistent with the optical route of lightpath $\ell$:
+\begin{equation}
+    z^{\ell}_{e}=1
+    \Longleftrightarrow
+    e \in path(\ell).
+    \label{eq:z-consistency}
+\end{equation}
+
+\subsection{Spectrum Continuity}
+
+Each lightpath must use the same spectrum slot on all fiber links along its optical path:
+\begin{equation}
+    s_{\ell} \text{ is identical for all } e\in path(\ell).
+    \label{eq:continuity}
+\end{equation}
+
+\subsection{Spectrum Non-Overlapping}
+
+Two lightpaths traversing the same fiber edge cannot use the same spectrum slot:
+\begin{equation}
+    s_{\ell} \neq s_{\ell'},
+    \quad
+    \forall \ell\neq \ell',
+    \text{ if } z^{\ell}_{e}=1 \text{ and } z^{\ell'}_{e}=1.
+    \label{eq:non-overlap}
+\end{equation}
+
+\subsection{Spectrum Range}
+
+The assigned slot must lie within the available spectrum range:
+\begin{equation}
+    1 \leq s_{\ell} \leq W,
+    \quad \forall \ell\in L.
+    \label{eq:slot-range}
+\end{equation}
+
+\subsection{Fiber Capacity}
+
+The total number of lightpaths using a fiber cannot exceed the number of available slots:
+\begin{equation}
+    \sum_{\ell\in L} z^{\ell}_{e} \leq W,
+    \quad \forall e\in E^{fiber}.
+    \label{eq:fiber-capacity}
+\end{equation}
+
+\subsection{Non-Disruptive Reconfiguration}
+
+The reconfiguration distance from the initial state is bounded by $\rho$:
+\begin{equation}
+    \sum_{(u,v)\in E^{IP}}
+    \sum_{p\in P_{uv}}
+    \left|y_{uv,p} - y^{0}_{uv,p}\right|
+    \leq \rho.
+    \label{eq:non-disruptive}
+\end{equation}
+
+\section{Simulated Annealing Algorithm}
+
+A multilayer state is represented as
+\begin{equation}
+    S = (x,y,z,s),
+\end{equation}
+where $x$ describes IP routing, $y$ describes lightpath allocation for IP links, $z$ describes optical-fiber usage, and $s$ describes spectrum-slot assignment.
+
+\begin{algorithm}[t]
+\caption{Penalty-Based Simulated Annealing for Cross-Layer Optimization}
+\label{alg:sa}
+\begin{algorithmic}[1]
+\State Generate an initial multilayer state $S$
+\State Evaluate $Cost(S)$ using \eqref{eq:objective}
+\State $S_{best} \gets S$
+\State $T \gets T_{max}$
+\While{$T > T_{min}$}
+    \For{$i = 1$ to $N_{iter}$}
+        \State Generate a neighbor solution $S'$ from $S$
+        \State Evaluate $Cost(S')$ including penalties
+        \State $\Delta \gets Cost(S') - Cost(S)$
+        \If{$\Delta < 0$}
+            \State $S \gets S'$
+        \Else
+            \State Generate $r\sim U(0,1)$
+            \If{$\exp(-\Delta/T) > r$}
+                \State $S \gets S'$
+            \EndIf
+        \EndIf
+        \If{$Cost(S) < Cost(S_{best})$}
+            \State $S_{best} \gets S$
+        \EndIf
+    \EndFor
+    \State $T \gets \gamma T$
+\EndWhile
+\State \Return $S_{best}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Neighbor Operations}
+
+The implementation generates neighboring solutions using the following operations:
+\begin{itemize}
+    \item \textbf{Reroute IP demand:} select one demand and replace its IP route with another candidate path.
+    \item \textbf{Add lightpath:} add one lightpath to an IP link, preferably an overloaded link.
+    \item \textbf{Remove lightpath:} remove one existing lightpath to reduce energy cost, while penalties prevent severe capacity or spectrum violations.
+\end{itemize}
+
+\section{Experimental Evaluation}
+
+The implementation evaluates the algorithm under increasing numbers of traffic demands. For each demand level, the initial allocation and the SA-optimized result are compared using the following metrics:
+\begin{itemize}
+    \item \textbf{Initial cost:} total cost before optimization.
+    \item \textbf{Optimized cost:} best cost after applying Simulated Annealing.
+    \item \textbf{Normalized cost:}
+    \begin{equation}
+        NormalizedCost = \frac{Cost}{\sum_{d\in D} b_d}.
+    \end{equation}
+    \item \textbf{Improvement percentage:}
+    \begin{equation}
+        Improvement =
+        \frac{InitialCost - OptimizedCost}{InitialCost}\times 100\%.
+    \end{equation}
+\end{itemize}
+
+The normalized cost measures the cost per unit bandwidth, making comparisons fair across scenarios with different numbers of demands.
+
+\section{Conclusion}
+
+This formulation captures the essential cross-layer interactions between IP routing and EON resource allocation. The penalty-based SA algorithm improves the initial allocation by jointly adjusting IP routes and lightpath resources while considering flow, capacity, spectrum, consistency, and non-disruptive constraints.
+
+\balance
+\end{document}

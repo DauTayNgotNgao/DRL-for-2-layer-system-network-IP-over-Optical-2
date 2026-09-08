@@ -1,0 +1,1300 @@
+--- PAGE 1 ---
+800 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+DRL-Assisted Reoptimization of Network Slice
+Embedding on EON-Enabled Transport Networks
+Seyed Soheil Johari ,Graduate Student Member, IEEE , Sepehr Taeb, Nashid Shahriar ,Member, IEEE ,
+Shihabur Rahman Chowdhury ,Student Member, IEEE , Massimo Tornatore ,Fellow, IEEE ,
+Raouf Boutaba ,Fellow, IEEE , Jeebak Mitra , and Mahdi Hemmati ,Member, IEEE
+Abstract —5G transport networks will support dynamic
+services with diverse requirements through network slicing.Elastic Optical Networks (EONs) facilitate transport networkslicing by ﬂexible spectrum allocation and tuning of transmissionconﬁgurations. A major challenge in supporting dynamic servicesis the lack of priori knowledge of future slice requests. As a con-sequence, slice embedding can become sub-optimal over time,leading to spectrum fragmentation and skewed utilization. Thisin turn can block future slice requests, impacting operator rev-enue. To address this issue, operators can periodically re-optimizeslice embedding for reducing fragmentation. In this paper, weaddress this problem of re-optimizing network slice embeddingon EONs for minimizing fragmentation. The problem is solvedin its splittable version, which signiﬁcantly increases problemcomplexity, but also offers more opportunities for a larger setof re-conﬁguration actions. We employ simulated annealing forsystematically exploring the large solution space. We also pro-pose a greedy algorithm to address the practical constraint oflimiting the number of re-conﬁguration steps. Moreover, wepresent a novel method based on Deep Reinforcement Learning(DRL) for determining when performing re-conﬁguration is most
+effective. Our extensive simulations demonstrate that the greedy
+algorithm yields a solution very close to that obtained usingsimulated annealing while requiring orders of magnitude lesserre-conﬁguration actions. Finally, we show that by applying thegreedy algorithm periodically on the network according to theDRL-based time selection algorithm, a signiﬁcant improvement inthe total number of accepted slice requests can be achieved withonly performing a limited number of re-conﬁguration operations.
+Index Terms —Elastic optical network, fragmentation, deep
+reinforcement learning (DRL), transport network.
+Manuscript received 26 July 2022; revised 10 November 2022; accepted 22
+November 2022. Date of publication 3 January 2023; date of current version
+7 March 2023. The associate editor coordinating the review of this article
+and approving it for publication was B. Martini. (Corresponding author:
+Seyed Soheil Johari.)
+Seyed Soheil Johari, Sepehr Taeb, and Raouf Boutaba are with the David
+R. Cheriton School of Computer Science, University of Waterloo, Waterloo,
+ON N2L 3G1, Canada (e-mail: ssjohari@uwaterloo.ca; staeb@uwaterloo.ca;rboutaba@uwaterloo.ca).
+Nashid Shahriar is with the Department of Computer Science, University of
+Regina, Regina, SK S4S 0A2, Canada (e-mail: Nashid.Shahriar@uregina.ca).
+Shihabur Rahman Chowdhury was with the David R. Cheriton School of
+Computer Science, University of Waterloo, Waterloo, ON N2L 3G1, CanadaHe is now with Apple, Seattle, WA 98109 USA (e-mail: sr2chowdhury@
+uwaterloo.ca).
+Massimo Tornatore is with the Department of Electronics, Information
+and Bioengineering, Politecnico di Milano, 20133 Milan, Italy (e-mail:massimo.tornatore@polimi.it).
+Jeebak Mitra and Mahdi Hemmati are with the Ottawa Optical
+Systems Competency Centre, Huawei Technologies Canada ResearchCenter, Ottawa, ON K2K 3J1, Canada (e-mail: jeebak.mitra@huawei.com;
+mahdi.hemmati@huawei.com).
+Digital Object Identiﬁer 10.1109/TNSM.2022.3230381I. I NTRODUCTION
+TRANSPORT networks are evolving to support dynamic
+and short-lived services with diverse quality of ser-
+vice (QoS) requirements [ 1], [2], [3], such as enhanced
+mobile broadband and ultra-reliable low-latency communi-cation [ 4] through 5G network slicing [ 5]. This evolution
+towards network slicing is being fueled by recent advances
+in Elastic Optical Network (EON) virtualization [ 5], [6], as
+EONs support ﬁner-grained spectrum allocation and tuning oftransmission conﬁgurations (such as modulation format, for-
+ward error correction (FEC) overhead, and baudrate) that allow
+to rightsize EON resource allocation to network slices [ 7], [8].
+Hence, EON-enabled transport networks can leverage theirﬂexible resource allocation capabilities to offer to customers
+tailored and dynamic network slices, typically in terms of a
+virtual networks (VN) consisting of virtual nodes connectedby virtual links.
+A key challenge in supporting dynamic services with short
+lifetime through network slicing is how to deal with the lack
+of a priori knowledge of slice arrivals and departures. Withoutsuch knowledge, it has been observed that slice resource allo-cation becomes sub-optimal over time, and, in the speciﬁc
+case of EONs, underlying spectrum resources become frag-
+mented and capacity utilization becomes skewed [ 9], [10].
+Such imbalanced and fragmented spectrum utilization canresult in blocking future VN requests [ 9]. For these reasons, it
+is essential to re-optimize resources allocated to VNs to mini-
+mize fragmentation, ensuring optimal resource utilization, andmaking room for future VN requests.
+In this paper, we address the problem of re-optimizing
+network slice or VN embedding on an EON. VN embedding
+on EON involves allocating spectrum resources to a VN bymapping the virtual nodes and virtual links on EON nodes
+and paths with appropriate transmission conﬁguration [ 7].
+Among the possible objectives, we focus on reducing spec-trum fragmentation through re-optimization of VN embedding.
+Defragmentation is considered crucial for network opera-
+tors and has attracted remarkable attention in research [ 9].
+Since minimizing fragmentation alone may lead to unbounded
+increase in spectrum usage, we measure to limit additional
+spectrum usage during defragmentation, which adds additional
+challenge to the re-optimization problem. While solving the
+network slice embedding re-optimization problem, we onlyconsider modifying virtual link embedding, as virtual nodes of
+a network slice typically have location constraints (e.g., they
+1932-4537 c/circlecopyrt2023 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 2 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 801
+are mapped to an EON node equipped with compute resources
+located at a metro data center (MDC) or a Point-of-Presence(PoP) site).
+Moreover, re-optimization of VN embedding needs to
+be invoked multiple times during network operation, anddetermining the most appropriate times for invoking the re-
+optimization is necessary for decreasing VN blocking with
+minimal operational complexity. In other words, not per-forming re-optimization can result in severe VN blocking,
+whereas invoking re-optimization too often will cause unnec-
+essary operational complexity. We propose to utilize DeepReinforcement Learning (DRL) for selecting the times for per-
+forming re-optimization. DRL has shown to be very successful
+for maximizing both current and future rewards simultaneously
+in many decision-making applications where there are no prior
+knowledge about the behavior of the environment [ 11], [12].
+Even though Virtual Network Embedding (VNE) related
+problems have been thoroughly investigated in the past, espe-
+cially in IP networks, investigation of the same problem in theoptical layer is less extensive, and in particular, recent devel-
+opment of sliceable transponders [ 13] and splitting-enabled
+EON [ 14] to support massive bandwidth requests has increased
+the complexity of the problem [ 8]. This has motivated us to
+devise a new methodology to address the increased complex-
+ity of the VNE-related problems. So, we signiﬁcantly differfrom the research literature in optical network defragmenta-
+tion on several aspects. First, we consider the possibility of
+splitting a virtual link demand on multiple continuous and con-tiguous spectrum allocations (called splits) over one or more
+substrate EON path(s) (similar to [ 8], [14]). Second, we do not
+assume the existence of any special technology ( e.g., push-
+pull [ 15] and hop-retuning [ 16]) for performing disruption
+free defragmentation. We assume the capabilities of commer-cial transponders and adopt make-before-break [17] approach
+whenever possible.
+We quantify spectrum fragmentation using the root mean
+square fragmentation (RMSF) metric [ 18], which is non-
+linear. Due to the non-linearity of our objective function of
+RMSF, it becomes infeasible to use standard integer/mixed-integer programming modeling tools to obtain optimal solution
+even for very small problem instances. Therefore, we lever-
+age Simulated Annealing (SA) search [ 19] to systematically
+explore a large solution space for obtaining an estimation of
+a loose lower bound of RMSF. One advantage of using SA
+is that the search process naturally yields the sequence ofactions that must be taken to bring the network to the com-
+puted re-optimized state. However, it may arrive at the ﬁnal
+defragmented state by applying a excessively large numberof re-conﬁguration actions on the network, which might be
+undesirable from a network operator’s perspective. Hence, we
+also devise a greedy search heuristic that navigates through
+the solution space with a given budget on the number of
+possible actions. To the best of our knowledge, this aspectof defragmentation was not studied before in the context of
+splitting-enabled EON. Our extensive evaluation using real
+network topologies demonstrates that the greedy search pro-cess reduces network defragmentation nearly to the sameextent as the SA search, while applying orders of magni-
+tude lesser number of reconﬁguration actions. For determiningthe best times to perform re-optimization, we train a Soft
+Q-Network model [ 20] as a DRL agent that in each con-
+sidered time step, intelligently decides whether to invoke there-optimization process or not.
+This paper is an extended version of the work presented
+in [21]. With respect to a SA and a greedy algorithm in [ 21],
+we analyze the effect of applying re-optimization on increas-
+ing the EON’s ability to accept more VN requests. Moreover,
+we propose a novel DRL-based algorithm for resolving thetrade-off between increase in the number of accepted VNs
+and total number of performed re-optimization operations in
+an intelligent manner. Through extensive experiments, we
+demonstrate the superiority of our DRL-based method com-
+pared to other alternative strategies and also evaluate thegeneralization capability of the DRL method for VN request
+distributions that signiﬁcantly differ from those seen during
+training. Finally, we expand our discussion of the related worksand the experimental results.
+The rest of the paper is organized as follows. We ﬁrst dis-
+cuss the related works in Section II. Then, we discuss our
+choice of fragmentation metric and re-conﬁguration actions,
+followed by a formal problem deﬁnition in Section III.
+In Section IV, we present our SA algorithm for re-
+optimizing VN embedding over an EON. Our greedy search
+approach with a bounded number of re-conﬁguration actions
+is presented in Section V, and the DRL-based time selec-
+tion strategy for invoking the re-optimization operations is
+presented in Section VI. Evaluation results are presented in
+Section VII. We conclude with some future research directions
+in Section VIII.
+II. R ELATED WORKS
+EON spectrum defragmentation strategies fall into two
+broad categories, namely, proactive and reactive [ 9]. Proactive
+approaches are executed periodically or when fragmentation
+level reaches a pre-deﬁned threshold [ 22]. In contrast, reactive
+approaches defragment spectrum resources when the embed-
+ding of a new VN is blocked due to fragmentation and can
+make room for the newly arrived VN [ 23]. However, there
+is no guarantee that reactive defragmentation will be suc-
+cessful and it may result in sub-optimal embedding for the
+VNs that are migrated during the process. Another line ofwork for EON defragmentation is fragmentation-aware VN
+embedding [ 24], [25]. Fragmentation awareness is achieved by
+embedding new VNs in a way to reduce spectrum fragmenta-tion. Fragmentation-aware embedding may not be sufﬁcient
+to defragment an entire EON since such embedding only
+concerns fragmentation around the new VN. In contrast, proac-
+tive defragmentation accounts for all VNs and EON links,
+and offers more opportunities to re-optimize VN embeddings.Hence, in this paper, we focus on proactive defragmenta-
+tion by changing the route and/or the spectrum allocation
+of connections. While doing so, existing approaches assumethe availability of techniques, such as push-pull or hop
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 3 ---
+802 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+re-tuning, that promises to reconﬁgure spectrum allocation
+without causing any trafﬁc disruption [ 26], [27]. However,
+these technologies are still experimental and are not available
+in commercial equipment. Conversely, we do not assume any
+speciﬁc technology for eliminating disruption and adopt themake-before-break approach whenever possible [ 17].
+Shakya and Cao proposed a defragmentation approach
+in [28] that minimizes the maximum used spectrum slot
+index on any EON link. This objective may not be use-
+ful since many fragmented spectrum blocks can exist on a
+link even when maximum slot index is low. Dávalos et al.presented two metaheuristic-based algorithms for selecting
+lighpaths that need to be reconﬁgured for defragmenta-
+tion [ 29]. This approach does not generate the order in which
+lightpaths should be re-conﬁgured that we address in this
+paper. Comellas et al. [ 22] evaluated several ordering strategies
+for reconﬁguring lightpaths for defragmentation. However, a
+deterministic order can get stuck at a local minima, mandating
+to include randomness in the deframengtation algorithm.
+Zeng et al. presented an SA-based defragmentation mech-
+anism for EONs that modiﬁes the route and/or spectrum
+assignment of a randomly chosen connection [ 30]. The cost
+function in [ 30] prefers a state where lightpaths have shorter
+lengths, and spectrum is allocated from a lower frequency.
+Conversely, we adopt a comprehensive cost function account-ing for multiple factors such as number of fragments, size of
+fragments, and locations of fragments in the spectrum. We
+also employ several new re-conﬁguration operations and addi-tional optimizations not considered in [ 30]. One caveat of SA
+algorithm, both ours and that in [ 30], is that it requires a
+large number of steps to reach a re-optimized state, making it
+impractical. Therefore, we also propose an effective algorithm
+that reaches a defragmented state in a limited amount of steps,which makes our approach ready to be applied in practice.
+There have been some works that try to form an analytical
+performance modeling of spectrum defragmentation in elas-tic optical links, such as [ 31], and [ 32] .T h ew o r ki n[ 31]
+presents an analytical study of the effect of defragmenta-
+tion on the connections’ blocking probability in an elasticoptical link depending on whether defragmentation is proac-
+tively or reactively performed. The authors of [ 32] formulate
+a Markov Chain model for characterizing the fragmentationissue in a simpliﬁed two-service elastic optical link scenario.
+These works are limited to the case of a single ﬁber link,
+and extending their work to attain an analytic modeling ofspectrum defragmentation in large scale EONs with splitting-
+enabled technology would be a very interesting but challenging
+research direction. Moreover, heuristics that require calculatinga complex fragmentation metric (such as RMSF [ 18]) would
+signiﬁcantly increase the complexity of the modeling. We con-
+sider such analytical modeling to be out of scope of this paper
+and leave it as a potential future work direction.
+There are also several papers that analyze the effect of spec-
+trum defragmentation on decreasing the blocking probability
+and improving the EON capacity for accepting more future
+trafﬁc. Among them, [ 29] evaluates the effect of two proactive
+defragmentation algorithms based on Ant Colony optimization
+and Genetic metaheuristics on blocking probability overtwo different EON topologies. A survey paper [ 9] evalu-
+ates and analyzes state-of-the-art fragmentation managementapproaches in terms of blocking probability by implementing
+and applying those approaches in a uniﬁed simulation envi-
+ronment for fair comparison. As discussed before, an impor-tant question regarding proactive defragmentation is when
+to invoke the re-optimization process. However, the afore-
+mentioned papers simply trigger the re-optimization processpro-actively in a periodic manner, or when speciﬁc thresholds
+are exceeded (e.g., fragmentation is high). In contrast to these
+works, [ 27] proposed an intelligent algorithm for time selec-
+tion of the re-optimization operations. The proposed algorithm
+periodically monitors the temporary blocking probability for
+the previous requests in a time window whose size is purpose-
+fully adjusted to cope with the changes in the trafﬁc. However,
+as our experimental results will show, simply relying on a sin-gle metric for choosing the re-optimization times might lead
+to a very poor performance in terms of acceptance ratio.
+III. P
+ROBLEM DEFINITION
+A. Problem Statement
+We are given an EON Gand a set of VNs Gembedded
+onG.E O N G(the substrate network) consists of a set of
+substrate optical nodes (SNodes) and substrate optical links
+(SLinks), respectively; and a SPath is a substrate path betweentwo SNodes in the EON that can contain a sequence of SLinks.
+Each VN ¯G∈G consists of a set of virtual nodes (VNodes)
+¯Vand virtual links (VLinks) ¯Ewhere each VLink ¯e∈¯Ehas
+a bandwidth demand b
+¯e. Each VN is embedded by mapping
+each of its VNodes to an EON node and each of its VLinksto a set of splits with a maximum of qsplits. Fig. 1shows
+an illustrative example of the embedding of a VLink over two
+splits. Each split represents a path in the EON where eachpath pis conﬁgured with a transmission conﬁguration repre-
+sented by a tuple t=(d,b,m,f)∈T=(D×B×M×F)to
+provide a data-rate so that the sum of data-rates is b
+¯e. Here, d,
+b,m, and frepresent data-rate ,baud-rate ,modulation format ,
+andFEC selected from the set of possible values D,B,M,
+andF, respectively. Each tuple thas a spectrum requirement
+and a maximum optical reach within which tcan be used with
+satisfactory signal quality as deﬁned by a reach table R[33].
+The reach table Rcontains a set of tuples each of which has a
+speciﬁc spectrum requirement and a maximum optical reach.
+Note that the same SPath can be used multiple times as the
+splits of a VLink following the reasoning in [ 8]. Also note
+thatχ¯ei=(p,t,sb,st)|1≤i≤qrepresents the i-th split,
+whereχ(p)
+¯eiandχ(t)
+¯eidenote the selected SPath and transmis-
+sion conﬁguration for the i-th split, respectively. The spectrum
+slot allocation for the i-th split begins at index χ(sb)
+¯ei∈Sand
+ends at index χ(st)
+¯ei∈Salong each SLink in the SPath χ(p)
+¯ei
+to satisfy the spectrum contiguity constraint [ 9].
+The VN embedding re-optimization problem seeks to ﬁnd
+a feasible sequence of re-conﬁguration actions applied on the
+VN embeddings such that the resulting embeddings of the
+VNs optimize ( i.e., maximize or minimize) a certain objective
+function. In our problem, the objective is to minimize network-
+wide RMSF metric presented in ( 1). This metric leverages
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 4 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 803
+TABLE I
+DIFFERENT RE-CONFIGURATION ACTIONS AND CORRESPONDING COST
+Fig. 1. Embedding of a virtual link over two substrate splits. Red and whiterectangles represent occupied and empty spectrum slots, respectively.
+RMSF values of each EON link computed using ( 2), which
+is the most comprehensive fragmentation metric [ 18]. We
+assume VNode mapping to remain unchanged during the re-optimization process (typical assumption in optical network
+virtualization [ 34]).
+F
+RMSF
+net=/summationtext
+e∈EFRMSFe
+|E|smax
+|S|(1)
+FRMSF
+e=smaxe|I|/radicalbigg/summationtext
+i∈If2
+i
+|I|(2)During re-optimization, the embedding of a VLink of the
+existing VNs in Gcan be re-conﬁgured one or multiple times
+to reduce spectrum fragmentation. VLink re-conﬁguration con-sists in changing the VLink’s embedding, i.e., one or more
+splits’ SPath (χ(p)
+¯ei), tuple(χ(t)
+¯ei), and spectrum allocation
+(χ(sb)
+¯eiand/orχ(st)
+¯ei)or a combination thereof. A re-conﬁgured
+split still has to satisfy spectrum contiguity and optical reach
+constraints and total number of splits after re-optimization
+cannot be more than q. We use 5 different re-conﬁguration
+actions with different levels of disruption and their impact on
+resource usage ( e.g., transponder or spectrum usage) shown
+in Table I. For instance, R1in Table Imay change any or
+all ofχ(t)
+¯ei,χ(sb)
+¯ei, andχ(st)
+¯eiof a split while keeping its χ(p)
+¯ei
+ﬁxed, whereas R2can change all of them. Splitting offers us
+new re-conﬁguration actions (R3,R4, and R5)that were not
+considered in prior work. For example, we can merge two
+splits into a larger one using R3/R4or divide a large split
+into multiple smaller ones using R5.
+All actions except R4in Table Ican be applied using make-
+before-break to avoid any disruption as long as the spectrum
+allocation after applying any of these actions does not overlap
+with the previous spectrum allocation. Note that make-before-
+break requires double committed resource for a short period of
+time when it is applied. There are scenarios when the spectrum
+allocation after re-conﬁguration overlaps with the allocation
+present before applying the action such as for action R4in
+Table I. In such scenarios, it might not be possible to apply
+make-before-break , therefore, the disruption level can be sig-
+niﬁcantly high. However, disruptive action such as R4may
+be useful to defragment a highly utilized EON and should be
+used only when necessary.
+B. Pre-Computations
+For each VLink ¯e∈¯E, we pre-compute Pk¯e,as e to f k
+shortest paths between each pair of SNodes that a VLink’s end
+VNodes have been mapped to. For each SPath p∈Pk¯e,w e
+pre-compute the set of admissible transmission conﬁgurations,
+T¯ep⊂T , such that each conﬁguration t∈T¯epresults in a
+reach rt≥len(p)and has a data-rate t(d).T¯econtains all the
+distinct tuples suitable for ¯eand is deﬁned as/uniontext
+∀p∈Pk
+¯eT¯ep.
+IV . R E-OPTIMIZATION WITHUNBOUNDED
+NUMBER OF ACTIONS
+In this section, we present a Simulated Annealing [ 19]( S A )
+based algorithm for solving the VN embedding re-optimization
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 5 ---
+804 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+problem. SA allows us to systematically search through a solu-
+tion space, while maintaining a lineage of operations startingfrom the initial network state to reach a feasible re-optimized
+state. The advantage of SA is that it can avoid getting stuck at
+local minima by employing random moves, and converge toa global minimum if the SA process is run for a sufﬁciently
+long period of time.
+A. Simulated Annealing (SA) Algorithm
+SA systematically explores the neighborhood of an initial
+set of embeddings of all VLinks in G(i.e.,current_state ) and
+keeps reducing the fragmentation of the EON G.A neigh-
+borto the current_state is another set of embeddings where
+the embedding of only one VLink from the current_state is
+re-conﬁgured using one of the actions presented in Table I.
+SA then evaluates quality of the neighbor using our objective
+function of F
+RMSF
+net in Eqn. ( 1) and moves to a neigh-
+bor that improves FRMSF
+net . It also probabilistically accepts
+a worse neighbor (a re-optimized embedding with a higher
+value of FRMSF
+net than the current_state ) from the search neigh-
+borhood. Typically, a temperature parameter (T) and energyfunction controls the probability of accepting a worse neigh-
+bor. Parameter Tis set to a higher value during the initial
+iterations of the search, resulting in a higher probability ofaccepting a worse neighbor. A cooling schedule attenuates the
+temperature and eventually decreases the probability of accept-
+ing a worse neighbor towards the end of the SA search. Byaccepting worse solutions, SA tries to avoid being stuck at a
+local minimum. We run multiple iterations of the neighbor-
+hood exploration procedure for each temperature to cover a
+wider search space. To better explain the SA algorithm, we
+deﬁne the following:
+•A neighborhood generation function, which generates
+a set of neighbors to the current_state and returns a
+neighbor according to a policy.
+•An energy function, which determines the ﬁtness of a
+neighbor. It regulates the probability of accepting or
+rejecting a neighbor during an iteration of SA.
+•A cooling schedule, which determines how the tempera-
+ture is attenuated during the search process.
+1) Neighborhood Generation: We devise an algorithm
+(Algorithm 1) for generating a set of neighbors to the cur-
+rent_state and returning one of the neighbors. Algorithm 1
+ﬁrst chooses a random split Yfrom the uniformly distributed
+set of embeddings of the VLinks of current_state . Then,
+Algorithm 1generates all feasible neighbors, all_neighbors ,
+by applying each action from Table Ion split Y. However,
+if the chosen random split belongs to a Vlink that does not
+allow service disruption according to its QoS requirement,
+then no neighbors from applying R4on the current state will
+be generated in this process. Moreover, note that the num-
+ber of feasible neighbors for a single action can be largedue to the many possible feasible spectrum re-allocation of
+a split Y. Since there can be a substantial number of feasi-
+ble neighbors in all_neighbors and a signiﬁcant portion of
+them are not helpful for re-optimization, Algorithm 1adopts
+two heuristics for keeping the most promising neighbors inAlgorithm 1: Select-Neighbor
+1function Select-Neighbor (current _state,δ,Γ,Γ/prime)
+2 Choose a random split Yfrom current_state
+3 all_neighbors ←Generate all feasible neighbor states by
+applying actions from Table Ion split Y
+4 Exclude neighbor states from all_neighbors that uses ≥δ%
+additional slots compared to current_state
+5 sorted _neighbors ←Sort the neighbors in all_neighbor in
+increasing order of their RMSF
+6 neighbor _pool←Select the ﬁrst Γ%neighbors from
+sorted_neighbors
+7 Remove neighbors generated by R4that don’t lie in the
+ﬁrstΓ/prime%ofneighbor_pool
+8 max _RMSF←Maximum value of RMSF among the
+neighbors in neighbor_pool
+9 forneighbor ∈neighbor _pool do
+10 Gainneighbor ←(RMSFneighbor −max _RMSF)2
+11<neighbor ,action _spec>←A neighbor from
+neighbors_pool with a probability proportional to
+Gainneighbor and corresponding action
+12 return<neighbor ,action _spec>
+neighbor_pool . First, Algorithm 1excludes those neighbors
+from all_neighbors that useδ%additional spectrum slots com-
+pared to that used in split Y’s current embedding (line 4).
+We callδasSlot Usage Limit . The rationale for doing so
+is that a network operator may not want to increase spec-
+trum usage during re-optimization and may want to move to
+neighbors whose spectrum usage remains within a speciﬁedbound. Second, Algorithm 1populates a sorted list of the
+remaining neighbors in all_neighbors in increasing order of
+the neighbors’ F
+RMSF
+net values ( sorted_neighbors ) and adds
+only the ﬁrst Γ% (called as Neighborhood Limit ) neighbors
+from sorted_neighbors toneighbor_pool (line 6). Here, both
+δandΓparameters can be tuned based on network oper-
+ator policies. Moreover, as action R4has the drawback of
+causing service disruption, to make sure that this action isonly chosen when it leads to a signiﬁcant decrease in the
+network’s fragmentation metric, we introduce a new parameter
+Γ
+/primecalled Disruption Limit . We only keep neighbors generated
+by action R4that lie in the ﬁrst Γ/prime%of neighbors in neigh-
+bor_pool (which is also sorted based on the FRMSF
+net values)
+and remove all the other neighbors generated by applying R4
+from neighbor_pool . In our experiments, we observed that
+even setting Γ/prime= 100% led to choosing very limited num-
+ber of action R4(see Fig. 6). However, if the operators desire
+to further limit the number of times that action R4is chosen
+in the defragmentation process, they can choose a lower value
+forΓ/prime.
+After generating neighbor_pool , Algorithm 1ﬁnds the
+maximum value of FRMSF
+net among the neighbors in neigh-
+bor_pool . This value is then used to compute the relative
+RMSF gain (Gain neighbor)of each of the other neighbors
+inneighbor_pool ( l i n e8–9 ) . Gain neighbor is deﬁned as the
+square of the difference between the neighbor’s FRMSF
+net and
+the maximum value of FRMSF
+net . Finally, the algorithm returns
+a neighbor with the probability proportional to its RMSF gain
+andaction_spec , the action that generated the neighbor.
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 6 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 805
+Algorithm 2: SA-Re-Optimize
+1function SA-Re-Optimize (C,itmax,ittemp ,T0,ρ)
+2 iterations ←0,T←T0
+3 action _sequence ←best_sequence ←φ
+4 best_state←current _state←C
+5 while iterations <itmax do
+6 while iterations t<ittemp do
+7 current _cost←FRMSF
+net(current _state)
+8 <new_state,action _spec>←Select-Neighbor
+(current _state,δ,Γ)
+9 new_cost←FRMSF
+net(new_state)
+10 Δenergy=current _cost−new_cost
+11 p←rand(0, 1)
+12 ifΔenergy<0orp<eΔenergy /Tthen
+13 current _state←new_state
+14 current _cost←new_cost
+15 action _sequence .append(action _spec)
+16 ifcurrent _cost<best_cost then
+17 best_cost←current _cost
+18 best_state←current _state
+19 best_sequence ←action _sequence
+20 Increment iterations t
+21 T=ρ∗T, Increment iterations
+22 return<best_state,best_sequence >
+2) Energy Function and Cooling Schedule: We use our
+fragmentation metric FRMSF
+net deﬁned in Eqn. ( 1)a st h e
+energy function. During iteration kof SA search, the prob-
+ability of moving to a neighbor is a function of energy and
+temperature [ 19]. This probability is deﬁned as follows:
+P(Energy,Tk)=/braceleftbigg1i f Δ Energy<0
+e−ΔEnergy /Tkotherwise .
+Here, Tkis the temperature at the k-th iteration and
+ΔEnergy=FRMSF
+net(current _state)−FRMSF
+net(new_state),
+where FRMSF
+net(current _state)andFRMSF
+net(new_state)are
+energies of current_state and the neighbor returned by
+Algorithm 1, respectively. We use a linear cooling sched-
+ule [ 35] and set the temperature Tat iteration k+1a s :
+Tk+1=ρ∗Tk, where0<ρ<1is the cooling rate (Line 21).
+The SA algorithm, as outlined in Algorithm 2, takes as
+input an initial state, i.e., current set of VN embedding (C),
+maximum number of iterations to perform (itmax), the num-
+ber of iterations to perform per temperature value (ittemp),
+an initial temperature (T0)and the cooling rate (ρ).D u r i n g
+each iteration for a particular temperature value, new_state
+and its action_spec are generated by invoking the Select-
+Neighbor procedure from Algorithm 1(line 8). Based on
+the energy of the new_state and the current temperature, the
+SA search moves to the new_state or not (line 11 – 15).
+During the search, SA keeps track of the best state ( best_state )
+and corresponding action sequence ( best_sequence ) accord-
+ing to the objective function FRMSF
+net . Finally, best_state and
+best_sequence generated during all the iterations are returned.
+V. R E-OPTIMIZATION WITHBOUNDED
+NUMBER OF ACTIONS
+Although the SA algorithm from Section IVis capable
+of systematically exploring a large solution space, it mayrequire an excessively large number of reconﬁguration actions
+to reach the re-optimized state. A long sequence of reconﬁg-uration steps can cause a long period of network instability,
+rendering the SA algorithm impractical in realistic settings.
+Another drawback of SA algorithm is the lack of fairnessamong the involved VLinks, i.e., some VLinks may be sub-
+ject to a signiﬁcantly more number of reconﬁguration actions
+than others, resulting in longer period of instability for thoseVLinks. To resolve these two limitations of the SA algorithm,
+we propose a greedy algorithm that can provide a satisfactory
+re-optimization performance using a bounded number of totalactions and per-VLink actions. In this section, we ﬁrst discuss
+the two constraints to bound the number of actions, and then
+describe how the greedy algorithm enforces these constraints.
+Maximum number of actions: This bound deﬁnes the max-
+imum number of actions (M
+max)the re-optimization process
+can take, similar to the bound proposed in [ 36]. The solu-
+tion to the re-optimization problem will generate an ordered
+sequence of at most Mmaxactions that lead to the best possible
+re-optimized state.
+Maximum number of actions per-VLink: This bound
+enforces a limit on the maximum number of actions (Amax)
+the re-optimization process can apply on each VLink.
+Similar bounds have been applied to ensure fairness during
+defragmentation of wavelength division multiplexed opticalnetworks [ 36]. Note that one could easily impose a differ-
+ent bound on different VLinks to facilitate a differentiated
+treatment of VLinks during re-optimization. Such differen-tial treatment can enable a variety of service level agreements
+where a VLink from the highest priority class is not impacted
+during re-optimization, while a VLink from best-effort class
+goes through a substantially large number of re-conﬁgurations.
+A. Greedy Algorithm
+The greedy algorithm presented in Algorithm 3takes the
+current set of VN embeddings (C), maximum number of iter-
+ations to perform (it
+max), number of inner iterations (itinn),
+Mmax, and Amax as inputs. The greedy algorithm follows a
+similar ﬂow of SA algorithm from Algorithm 2with three
+major differences, while ensuring the constraints imposed by
+the two bounds we discussed. First, Algorithm 3selects the
+best neighbor in terms of FRMSF
+net as opposed to select-
+ing a neighbor chosen based on a probability distribution
+in Algorithm 2. To do so, Algorithm 3invokes Best-Neighbor
+procedure that returns the neighbor with the lowest value
+ofFRMSF
+net among the neighbors generated by applying the
+actions from Table Ion a randomly selected split Y.B e s t -
+Neighbor procedure is a modiﬁed version of Algorithm 1
+that ﬁrst picks a random split Ywhich has been subjected
+toSlot Usage Limit and has not exceeded Amax actions, and
+returns the neighbor with the highest RMSF gain by apply-
+ing the actions from Table Ion split Y. We do not present
+Best-Neighbor procedure for the sake of brevity. If the neigh-
+bor returned by Best-Neighbor procedure improves FRMSF
+net
+from the current_state , Algorithm 3takes the corresponding
+action and moves to the neighbor state. Since Algorithm 3
+selects neighbor in a greedy fashion, it can get stuck to a
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 7 ---
+806 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+Algorithm 3: Greedy-Re-Optimize
+1function Gr-Re-Optimize (C,itmax,itinn,Mmax,Amax)
+2 iterations ←0,move _counter←0
+3 action _sequence ←best_sequence ←φ
+4 best_state←current _state←C
+5 while iterations <itmax do
+6 it_counter←0
+7 while iterations t<itinndo
+8 current _cost←FRMSF
+net(current _state)
+9 <new_state,action _spec>←Best-Neighbor
+(current _state,δ,Γ)
+10 new_cost←FRMSF
+net(new_state)
+11 ifnew_cost<current _cost then
+12 it_counter←0
+13 Increment move _counter
+14 current _state←new_state
+15 current _cost←new_cost
+16 action _sequence .append(action _spec)
+17 ifcurrent _cost<best_cost then
+18 best_cost←current _cost
+19 best_state←current _state
+20 best_sequence ←action _sequence
+21 ifmove _counter=Mmax then
+22 return<best_state,best_sequence >
+23 else
+24 Increment it_counter
+25 ifit_counter>no_of_splits then
+26 current _state←new_state
+27 current _cost←new_cost
+28 action _sequence .append(action _spec)
+29 Increment iterations t
+30 Increment iterations
+31 return<best_state,best_sequence >
+local minima. To circumvent this issue, Algorithm 2has a
+provision to move to a worse neighbor than the current_state
+with a low probability as discussed next.
+The second difference of Algorithm 3with Algorithm 2
+is that Algorithm 3moves to a worse neighbor than the
+current_state only when it is necessary as opposed to stochas-
+tically moving to a worse neighbor in Algorithm 2. This move
+is triggered when the neighbors of all the splits have worse
+FRMSF
+net values than FRMSF
+net ofcurrent_state . This is achieved
+by incrementing a counter ( it_counter ) when a worse neigh-
+bor is found and comparing it_counter with total number of
+splits ( no_of_splits ) in line 24 – 25. When a better neighbor
+is found in a particular iteration, it_counter is reset to start
+over (Line 12). Finally, Algorithm 3has a terminating condi-
+tion when the number of applied actions reaches the threshold
+Mmax in line 21. When such condition is reached, Algorithm 3
+returns the best neighbor found during the search. Note thatwe also tried a naive greedy algorithm that chooses a split Y
+on the EON link with the maximum fragmentation and does
+not take a worse neighbor at any time. Such a naive greedyalgorithm gets stuck to a local minima very soon during the
+search. Hence, our proposed greedy algorithm blends greedy
+selection of neighbors with random choice of a split at thebeginning and has the provision of selecting a worse neighbor
+when needed.VI. DRL
+FOR BALANCING THE TRADE -OFFBETWEEN
+NUMBER OF PERFORMED RE-OPTIMIZATION OPERATIONS
+AND ACCEPTANCE RATIO
+In the reoptimization process, we have a trade-off between
+the performance improvement and the increase in opera-
+tional complexity. In other words, invoking the re-optimizationoperations too frequently might cause unnecessary oper-
+ational complexity since the re-optimization process may
+involve spectrum re-conﬁguration or lightpath provision-ing/termination, while not performing the re-optimization
+operation in the some crucial situations can lead to a severe
+decrease in the number accepted VN requests.
+For this purpose, we propose a DRL-based algorithm to
+determine the timing of the re-optimization operations intel-ligently so that we can achieve a signiﬁcant improvement in
+acceptance ratio while keeping the number of re-optimization
+operations at a reasonable level.
+In the proposed algorithm, after every Kincoming VN
+requests (e.g., K=40), the DRL agent decides based on
+the status of the substrate network whether to apply the re-optimization operation or not. The components of the DRL
+formulation are as the following:
+RL steps: step l=i∈Nis when K×iVN requests have
+arrived, so each step represents arrival of KVN requests.
+RL state space: the state s
+l∈{ −1,+1}|E|×|S|describes
+whether each spectrum slot in each SLink of the EON is occu-pied (+1) or not ( −1).|E|is the number of SLinks and |S|
+is the number of spectrum slots in each SLink.
+RL action space: binary action a
+l∈{0,1}determines
+whether in step lthe re-optimization operation should be
+performed (al=1 ) or not(al=0 ) .
+RL reward: we deﬁne the reward of the DRL agent to be
+the acceptance ratio of the next Kincoming VN requests, plus
+a negative penalty for choosing to apply the re-optimizationoperation. In this way, the agent is encouraged to balance the
+trade-off between the number of performed re-optimization
+operations and the overall acceptance ratio of the VN requests.So, we have r
+l=δl−c×al, whereδlis the ratio of accepted
+VN request between steps landl+1, and cis the chosen
+penalty as the cost of performing a re-optimization operation.
+RL episode: each training episode should be a certain dura-
+tion of EON operation, possibly starting with an empty EON
+and then allocating/deallocating VN requests that dynami-cally arrive and depart according to some speciﬁc life times.
+We have described the training episode in our experiments
+speciﬁcally in Section VII.
+As the DRL algorithm, we choose the Soft Q-Network
+(SQN) method [ 20], which is a modiﬁcation of the well-
+known Deep Q-Network (DQN) method that adds an entropy
+regularizer to the standard Markov Decision Process (MDP)
+formulation, and is shown to be more robust, less likely tooverﬁt, more sample efﬁcient, and handles the exploit-explore
+balance better than DQN [ 20], [37], [38]. Since we are deal-
+ing with a discrete (binary) action space, the SQN would bea very suitable RL algorithm for our problem.
+A high-level overview of the SQN’s interaction with the
+EON environment is depicted in Fig. 2, and its training
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 8 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 807
+Fig. 2. Overview of the DRL agent’s interaction with the EON environment.
+procedure is described in Algorithm 4. At each training step,
+the agent observes the status of the EON’s SLinks as the cur-rent state s, and decides whether to invoke re-optimization or
+not (binary action a). Then, after Kincoming VN requests, the
+status of the substrate network is considered as the next state
+s
+/prime, and the reward value can be calculated as described before.
+The experience (s,a,s/prime,r)is stored in a memory referred to
+as the replay (or experience) buffer. For updating the SQN
+according to the (soft) Bellmam equation, instead of only using
+the latest experience, a mini-batch is sampled from the experi-ence buffer and used for updating the neural network to prevent
+oscillations in the action values. This technique of using a large
+buffer of past experience and sampling training data from it iscalled experience replay [ 39], and allows to learn from individ-
+ual experience multiple times and in general make a better use
+of experience. This procedure is repeated for the next statesand for multiple iterations (episodes) until the convergence of
+the DRL agent.
+VII. E
+VA L UAT I O N
+A. Simulation Setup
+We implement the algorithms presented in Section VII-B
+using C++. We consider a fully-ﬂexible EON using Nobel
+Germany topology (17 nodes and 26 links) from the SNDlib
+Repository (available at http://sndlib.zib.de). Each EON linkhas 4THz spectrum bandwidth divided into 160 slots of
+25GHz. To emulate a live EON, we develop a discrete event
+simulator. The simulator loads the EON with VNs by sim-ulating VN arrival and departure events and allocating and
+releasing spectrum slots to virtual links accordingly. In our
+simulator, VN arrival rate (VNR) follows a Poisson distribu-
+tion with varying means (4-20 VNs per 100 time units) and
+VN life time is exponentially distributed with a mean of 500time units. The number of VNodes vary from 2 to 6 and num-
+ber of VLinks vary from 3 to 15 (randomly chosen). When
+a VN arrives, the simulator embeds the VN using the algo-rithm proposed in [ 8]. This simulator generates snapshots of
+the EON’s current occupation at different time instances inAlgorithm 4: SQN Training
+1initialize the SQN weights
+2foreach training episode do
+3 wait for the ﬁrst KVNs to arrive
+4 observe current state s
+5 while episode is not ﬁnished do
+6 select action aand execute it
+7 wait for the next KVNs to arrive
+8 calculate reward r
+9 observe new state s/prime
+10 add(s,a,s/prime,r)to experience buffer
+11 sample mini-batch of experiences from buffer
+12 for each experience in mini-batch, perform gradient
+update for the SQN by the soft Bellman equation
+13 update state s←s/prime
+14 end of episode
+15end of training
+which a varying number of VNs are embedded. To analyse the
+performance of the compared algorithms in terms of RMSF
+reduction, we take different snapshots of the EON at different
+utilizations (varying from 30% to 60%). For each network uti-
+lization, we pick ﬁve random snapshots. For each snapshot, we
+independently run the compared variants ﬁve times and takethe output of the run that achieves the best defragmentation.
+Finally, we report the average (with maximum and minimum
+as errorbars) of the best performances of each ﬁve differentsnapshots.
+Then, to analyse the performance of applying re-
+optimization in terms of acceptance ratio, we run a similarsimulation and after every K=40 incoming VN requests,
+according to the chosen time selection strategy, we decide
+whether to perform our re-optimization operation ( Gr-Re-
+Optimize ) on the EON or not. We have reported the acceptance
+ratio and number of re-optimization operations of different
+time selection strategies in Section VII-F .
+We trained the DRL agent for around 6000 episodes of only
+simulations with VNR=12 (other VNR values are not used
+during training). Each training episode was running the sim-
+ulation for 5,000 time units; since we have VNR=12 and
+K=40, around 600 VNs will arrive during the simulation
+and the training episode will have around 15 RL steps (as
+deﬁned in Section VI). Fig. 3shows the reward of the DRL
+agent during the training episodes. We can see in the ﬁgurethat after a certain number of training episodes, the aggre-
+gated reward of the DRL agent in an episode has signiﬁcantly
+improved compared to the beginning where the DRL’s actionsare mostly chosen at random. This shows that the agent grad-
+ually learns the most effective times to invoke re-optimization
+and also not to perform too many re-optimizations due to thenegative penalty we have considered for each re-optimization
+operation.
+B. Compared Variants for Slice Embedding Re-Optimization
+1) SA-Baseline: This variant represents SA-Re-Optimize
+algorithm (Algorithm 2) with a huge number of iterations for
+it
+max andittemp . The values of T0= 100 andρ=0.99for
+Algorithm 2are chosen as best performing ones from multiple
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 9 ---
+808 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+Fig. 3. Episode rewards of the DRL agent trained with the VNR12 scenario.
+trials. This variant also uses Slot Usage Limit asδ= 10%
+andNeighborhood Limit asΓ = 10% for Algorithm 1chosen
+based on trials. SA-baseline is used to show convergence of
+SA-Re-Optimize algorithm, and it provides a feasible lowerbound for the re-optimization problem.
+2) SA-Re-Optimize: This variant shows the performance of
+SA-Re-Optimize algorithm (Algorithm 2) with a ﬁxed number
+of total iterations, i.e.,it
+max= 1000 ,ittemp= 1000 and
+T0= 100 andρ=0.99.
+3) Gr-Bounded: This variant represents Gr-Re-Optimize
+algorithm (Algorithm 3). In this case, we set Mmax= 500
+and Amax=∞in Algorithm 3.W ea l s ov a r y Mmax and
+Amax to show sensitivity of Algorithm 3.
+4) SA-SOA: Simulated Annealing State-of-the-art (SA-
+SOA) is a variant that represents the scenario where weminimize our cost function F
+RMSF
+net (i.e., Eqn. ( 2)) by using
+the SA-based defragmentation mechanism presented in [ 30].
+To the best of our knowledge the work in [ 30] is the closest
+to SA-Re-Optimize algorithm (Algorithm 2). The mechanism
+presented in [ 30] is not speciﬁc to any cost function, therefore,
+we use our cost function instead of theirs for a fair comparison.
+C. Compared Approaches for Time Selection of the
+Re-Optimization Operations
+1) Freq-Re-Optimize: In this approach, the re-optimization
+operation is frequently performed on the EON after every
+K=40 incoming VN requests. This approach yields the high-
+est number of re-optimization operations in our experiments.
+2) Less-Freq-Re-Optimize: This approach is a less frequent
+version of Freq-Re-Optimize , where the re-optimization oper-
+ation is performed on the EON after every K2>Kincoming
+VN requests (e.g., K2=4×K).
+3) Thr-Re-Optimize: In this approach, the re-optimization
+operation is invoked whenever the RMSF metric exceeds apredeﬁned threshold value.
+4) Window-Re-Optimize: In this approach, the times for
+performing the re-optimization operations are chosen based
+on the algorithm presented by [ 27]. In this algorithm, after
+each time interval Δt, the temporary blocking probability
+during the latest Δtis calculated and if it exceeds a pre-
+deﬁned threshold, the re-optimization process is invoked.Moreover, after performing a re-optimization operation, based
+on the behavior of the calculated blocking probabilities in the
+Fig. 4. Convergence of Algorithms.
+previous time intervals, Δtwill be increased or decreased to
+adopt to the current status of the network.
+5) DRL-Re-Optimize: In this approach, after every K=40
+incoming VN requests, our trained DRL agent decides whetherto invoke the re-optimization process or not based on the
+current status of the EON.
+D. Performance Metrics
+•RMSF Reduction: It is the reduction of fragmenta-
+tion achieved by an algorithm in terms of RMSF(F
+RMSF
+net)from the RMSF of the given snapshot before
+re-optimization. It is deﬁned as (1 - (the ratio of FRMSF
+net
+of the EON after re-optimization to FRMSF
+net of the EON
+before re-optimization)). The desired value of RMSF
+Reduction is 1 but that is not practically achievable.However, the closer RMSF Reduction is to 1, the more
+defragmentation is achieved through re-optimization ( e.g.,
+roughly, RMSF reduction of 0.95 means that 95% frag-mentation has been reduced compared to the fragmenta-
+tion before re-optimization).
+•Slot Ratio: It is the ratio between the total spectrum slot
+usage by the VNs after re-optimization and the total spec-
+trum slot usage by the VNs before re-optimization. Slot
+Ratio smaller than 1 means that spectrum occupation hasdecreased after re-optimization.
+•Action Count: It is the total number of sequential actionsadopted by an algorithm to reach its re-optimized state.
+•Number of Actions per VLink: It is the average number
+of actions applied on each VLink by an algorithm to reach
+its re-optimized state.
+•Acceptance Ratio: Ratio of the number of accepted VNrequests to the total number of requests during an episodeof the simulation.
+•Number of Re-optimization Operations: Total number ofperformed re-optimization operations during an episodeof the simulation.
+E. Discussion of Results on RMSF Reduction
+1) Comparison of Different Algorithms: Fig. 4shows that
+convergence of the compared variants in terms of RMSF
+(F
+RMSF
+net)values of the EON against number of actions for a
+speciﬁc snapshot with 60% utilization. This ﬁgure shows that
+SA-baseline converges to a feasible lowerbound if it is allowed
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 10 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 809
+Fig. 5. Performance of different algorithms.
+to run for a sufﬁciently long time. On the other hand, SA-Re-
+Optimize does not converge to a steady value but achieves
+an RMSF very close to SA-baseline ‘s lowerbound despite
+being run for a ﬁxed number of iterations. Similarly, SA-SOA
+diverges initially but reaches to an RMSF value closer to the
+lowerbound through a large number of steps. In comparisonto SA based approaches, Gr-bounded decreases RMSF of the
+EON sharply and achieves an RMSF close to SA-baseline ’s
+lowerbound even by applying a limited number of actions.
+Fig. 5compares different algorithms in terms of the
+performance metrics introduced before. In Fig. 5(a), RMSF
+reduction decreases for larger initial network utilization. Thisis rational since a highly utilized EON offers less room to
+re-optimize. Fig. 5(a) also shows that SA-Re-Optimize closely
+approximates SA-baseline , and both achieve great performance
+by reducing more than 90% fragmentation in the given snap-
+shots. On the other hand, Gr-bounded and SA-SOA achieve
+lower reductions, yet reductions consistently remain within
+10% of SA-baseline .Gr-bounded , despite using limited num-
+ber of actions, achieves higher or equal RMSF reduction thanSA-SOA in all cases except for the snapshots with the highest
+utilization (60%). Even in the constrained snapshots of high
+utilization, Gr-bounded reduces more than 80% fragmentation
+in the EON. If not properly designed, defragmentation algo-
+rithms might lead to an increase in spectrum slot usage. Our
+Fig. 6. Actions taken by different algorithms.
+proposed approaches ( SA-baseline ,SA-Re-Optimize , and Gr-
+bounded ) succeed instead in decreasing slot usage compared to
+the slot requirement of given snapshots (see Fig. 5(b)) thanks
+toSlot Usage Limit (δ)in Algorithm 1. Note instead that, in
+the case of SA-SOA that does not employ any Slot Usage Limit ,
+defragmentation requires more than 20% additional spectrum
+slots (while this increase is avoided by our algorithms).
+Note that RMSF reductions of SA based approaches ( SA-
+baseline ,SA-Re-Optimize , and SA-SOA )i nF i g . 5(a) require a
+huge number of re-conﬁguration actions to converge to the
+most optimized ﬁnal state (see Fig. 6(a)), in the order of
+100’s of thousands, which makes their application impracti-
+cal in a realistic operational settings. In contrast, Gr-bounded
+achieves more than 80% reduction on fragmentation with noadditional spectrum usage by employing only up to 500 re-
+conﬁguration actions (on average, 2 to 3 actions per VLink),
+making Gr-bounded a more practical solution to be leveraged
+by a network operator. Finally, Fig. 6(b) shows the distribution
+of different actions from Table Iadopted by SA-Re-Optimize ,
+SA-SOA , and Gr-bounded . According to this ﬁgure, usage of
+action R
+1comprises the major percentages, while the proposed
+re-conﬁguration actions (R3−R5)have been used in more
+than 20% cases of SA-Re-Optimize andGr-bounded .W ea l s o
+observe that the action R4which causes disruption has been
+used very rarely in case of Gr-bounded .
+2) Analysis of Gr-Bounded: Fig. 7shows the impact
+of varying Mmax (Maximum number of actions) on the
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 11 ---
+810 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+Fig. 7. Performance of Gr-bounded by varying Mmax .
+performance of Gr-bounded with Amax=∞and for dif-
+ferent values of initial network utilization. Fig. 7also com-
+pares the performance of Gr-bounded having different Mmax
+bounds with the best possible re-optimized state that could
+be achieved by SA-Re-Optimize in limited number of steps
+(Mmax= 1000) .F i g . 7(a) shows that Gr-bounded , even with
+the smallest Mmax(Mmax= 100) achieves 20-30% more
+defragmentation than the SA-Re-Optimize with Mmax= 1000 .
+We also observe that SA-Re-Optimize with Mmax= 1000
+could not even reduce RMSF more than 50% in any case. The
+reason for such poor initial performance of SA-Re-Optimize
+is that it allows to move to a worse neighbor with a high
+probability during the initial stages of SA search that diverges
+SA-Re-Optimize within Mmax= 1000 actions. Such behav-
+ior is fundamental to the SA algorithm and, for this reason,
+SA-Re-Optimize cannot be used in a practical setting where
+the number of actions is limited. Another takeaway fromFig. 7is that RMSF reduction of Gr-bounded increases dras-
+tically when the value of M
+max goes from 100 to 300 and
+RMSF reduction stabilizes for Mmax≥500. This justiﬁes
+our choice of Mmax= 500 for the other evaluations of Gr-
+bounded . Finally, Fig. 7(b) shows that Gr-bounded applies
+on average one action to each VLink when Mmax is low
+(Mmax= 100) .F o r SA-Re-Optimize , we keep the best re-
+optimized state within Mmax= 1000 that can be reached with
+lower number of actions per VLink. After reaching the best re-
+optimized state, SA-Re-Optimize diverges to worse solutions,
+Fig. 8. Performance of Gr-bounded by varying Amax .
+and hence we ignore those actions justifying the lower num-
+ber of per-VLink actions. This ﬁgure also shows that averagenumber of actions per VLink increases with the increase in
+M
+max and decreases when network utilization increases. This
+is due to the fact that, as utilization increases, snapshots havemore VLinks, and the same total number of actions are dis-
+tributed among more VLinks thus reducing number of actions
+per VLink.
+Let us now discuss the impact of varying A
+max (Maximum
+number of actions per-VLink) on the performance of Gr-
+bounded with Mmax= 500 and for different values of
+initial network utilization. Recall from Section V,Amax=x
+means that a VLink can go through at most xnumber of
+re-conﬁguration actions during the whole re-optimization pro-cess. Fig. 8(a) shows that Gr-bounded with A
+max=1
+achieves the lowest RMSF reduction as it allows a single
+re-conﬁguration action for all the splits of a VLink. Such aconservative version of Gr-bounded still reduces more than
+60% fragmentation using the smallest number of actions as
+s h o w ni nF i g . 8(b). As we loosen the constraint of A
+max
+(by increasing its value), a VLink can be re-conﬁgured more
+than once offering more opportunities to re-optimize. Hence,RMSF reduction increases for increasing A
+max. Such gain
+is more prominent for smaller values of Amax while smaller
+increases in RMSF reduction are observed for Amax≥6.
+This is due to the fact that the other limit of Maximum num-
+ber of actions (Mmax= 500) dominates in Gr-bounded for
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 12 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 811
+Amax≥6. Similar observations apply to the total number of
+actions in Fig. 8(b). Another takeaway from Fig. 8( b )i st h a t
+action count increases with the increase in utilization of snap-
+shots. This is expected as a snapshot with higher utilization
+has more VLinks that requires more actions to be applied.
+F . Discussion of Results on Different Re-Optimization Time
+Selection Strategies
+Fig. 9shows the acceptance ratio and number of re-
+optimization operations of different time selection approachesfor different values of VNR. As shown in Fig. 9(a), applying
+the greedy re-optimization operation on the network ( Freq-Re-
+Optimize ) leads to considerable improvement in the acceptance
+ratio compared to the case with no re-optimization, and this
+improvement is more signiﬁcant for lower VN arrival rates(8% for VNR=20 and 15% for VNR=4). This shows that
+there is a high correlation between the fragmentation level
+(RMSF) of the EON and its capability to accept more traf-ﬁc, and reducing RMSF is a very suitable indirect approach
+for increasing the acceptance ratio when there is no priori
+knowledge of the future VN requests.
+Moreover, we can see that the acceptance ratio of our
+proposed DRL-Re-Optimize is very close to the Freq-Re-
+Optimize case, while performing much fewer re-optimization
+operations (one-third on average, as shown in Fig. 9(b)). This
+means that our RL algorithm has successfully detected the
+most crucial moments for performing the re-optimization pro-cess to achieve a high degree of performance improvement
+with limited number of re-optimization operations. Moreover,
+the ﬁgure shows that other time selection strategies with
+similar number of re-optimization operations as our RL
+algorithm (namely, Less-Freq-Re-Optimize ,Thr-Re-Optimize ,
+and Window-Re-Optimize ) have a much lower acceptance
+ratio than our RL-based algorithm. Among the compared
+approaches, Window-Re-Optimize has the worst performance,
+since it considers the blocking probability in the latest time
+window as the metric for estimating the level of fragmentation
+in the network, while blocking probability depends also on theoverall link utilization of the EON. As a result, this method
+can lead to only invoking the re-optimization when the over-
+all link utilization is high, which might not be the optimumstrategy. Furthermore, Thr-Re-Optimize has a slightly better
+performance than Less-Freq-Re-Optimize , because it takes into
+account the RMSF metric for determining the right timesfor performing re-optimization, as opposed to Less-Freq-Re-
+Optimize that simply invokes the operations in ﬁxed intervals.
+As we mentioned earlier, the DRL agent for this evaluation isonly trained in simulations with VNR=12, however, we can
+see in Fig. 9that it performs well for other VNR cases that
+have not been seen during training as well. We will evaluate
+the generalization capability of our DRL algorithm in the next
+section with more details and experiments.
+G. Generalization Capability of the DRL Algorithm
+Since real-life application scenarios might be different than
+our simulation environment, we would desire a generalizable
+Fig. 9. Performance of different time selection strategies for different VNRs.
+DRL agent that does not overﬁt on the speciﬁc characteris-tics of our training environment, and is applicable to different
+scenarios that differ in distribution from those generated inour training setup. To analyze this aspect of our proposed
+algorithm, we evaluate the DRL agent on scenarios that were
+unseen during training, both in terms of VNR value andlife-time distribution, as described below:
+1) Different VNR Values: We already showed in Section
+VII-C that the DRL agent trained only with the VNR 12 case
+performed well on other VNR scenarios. For further evalu-
+ation, here, we have trained two other DRL agents trained
+with VNR 4 and VNR 20 scenarios (named RL4 and RL20)
+and reported their performance on different VNR cases in
+Table II. We can see that for each VNR case, the agent that is
+trained speciﬁcally for that VNR case has the highest accep-tance ratio (e.g., RL12 and VNR 12). However, the degradation
+in their performance for VNR cases that differ from the one
+they were trained for seems to be insigniﬁcant, specially forRL12 and RL20 agents. For example, the difference in accep-
+tance ratio of RL12 and RL20 in different cases never exceeds
+0.5%. However, we can see that the RL4 agent has a slightly
+worse performance compared to the other two agents, since
+the number of steps in each episode of training RL4 is much
+smaller than the other two agents. Therefore, we can argue thatagents trained with high VNR values are more generalizable
+in comparison.
+2) Different Life-Time Distributions: In Fig. 10,w eh a v e
+trained a DRL agent with VNR 12 scenario and exponential
+life-time distribution with a mean of 500 time units, and we
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 13 ---
+812 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+TABLE II
+ACCEPTANCE RATIO (A.R.) AND NUMBER OF RE-OPTIMIZATION
+OPERATIONS (#O PER.)OFRL A GENTS TRAINED WITHDIFFERENT VNR
+SCENARIOS EV ALUATED IN DIFFERENT VNR C ASES (E.G.,RL4ISA N
+AGENT THAT ISONLY TRAINED WITHVNR 4SCENARIO )
+Fig. 10. Performance of different time selection strategies for VNR 4a n d
+different life-time distributions.
+are evaluating the agent in scenarios with VNR 4 and different
+life-time distribution, namely an exponential distribution with
+a mean of 300 time units, an exponential distribution with a
+mean of 700 time units, and a Gamma distribution with shape
+argument of 0.2 and scale argument of 1600, that simulates ascenario where most of the life times are concentrated around a
+low value while a few outliers are signiﬁcantly higher than this
+value. So, in these experiments, both the VNR value and life-time distribution are different from the training environment.
+We can see in the ﬁgure that the DRL method still has a higher
+acceptance ratio compared to other approaches that have thesame number of re-optimization operations.
+VIII. C
+ONCLUSION
+In this paper, we have addressed the re-optimization of
+network slice embedding over EON with the objective to min-
+imize spectrum fragmentation. Given an EON with a set ofembedded VNs, the problem is to re-optimize the existing VN
+embeddings by employing a series of different re-conﬁgurationactions. We advance the state-of-the-art by addressing, for
+the ﬁrst time, the spectrum defragmentation problem in thecontext of splitting-enabled EON and by proposing novel
+re-conﬁguration actions that offer more opportunities to re-
+optimize. Given the complex and non-linear nature of thisproblem, we have proposed simulated annealing based algo-
+rithm for systematically exploring its large solution space. We
+also propose a greedy search mechanism to address the prac-tical constraint to limit the number of re-conﬁguration steps
+taken to reach a ﬁnal defragmentated state. For improving the
+number of accepted VN request through a reasonable numberof re-optimization operations, we proposed a DRL-based algo-
+rithm to determine the most effective moments for invoking
+re-optimization.
+Our extensive simulation results demonstrate that the sim-
+ulated annealing based algorithm reduces more than 90%fragmentation at the expense of employing a huge number re-
+conﬁguration actions. Our results also show that the proposed
+greedy search algorithm, if we consider a scenario with limitednumber of re-conﬁguration actions, achieves better defragmen-
+tation (reduces more than 80% fragmentation) than a prior
+approach that employs simulated annealing. The greedy searchalgorithm can impose different level of bounds on the number
+of actions to be taken, enabling a fair or prioritized treat-
+ment of VLinks during re-optimization. Moreover, our resultsshow that, when the number of admissible reconﬁguration
+action is limited ( e.g., below 500), having the possibility to
+exploit a comprehensive set of reconﬁguration actions (involv-ing merging and dividing splits of a virtual link) allows to
+achieve noticeable improvement in defragmentation. We also
+evaluated the effect of our proposed greedy re-optimization
+algorithm on increasing the network ability to accept more
+trafﬁc where the times of the re-optimization operations werechosen according to different strategies. We showed that our
+proposed DRL-based method outperformed the existing time
+selection methods with the same number of re-optimizationoperations up to 23% in acceptance ratio.
+R
+EFERENCES
+[1] B. Yan et al., “Tidal-trafﬁc-aware routing and spectrum allocation in
+elastic optical networks,” IEEE/OSA J. Opt. Commun. Netw. , vol. 10,
+no. 11, pp. 832–842, Nov. 2018.
+[2] M. Hadi, M. R. Pakravan, and E. Agrell, “Dynamic resource allocation
+in metro elastic optical networks using Lyapunov drift optimization,” J.
+Opt. Commun. Netw. , vol. 11, no. 6, pp. 250–259, Jun. 2019.
+[3] Z. Zhong et al., “Provisioning short-term trafﬁc ﬂuctuations in elas-
+tic optical networks,” IEEE/ACM Trans. Netw. , vol. 27, no. 4,
+pp. 1460–1473, Aug. 2019.
+[4] X. Foukas, G. Patounas, A. Elmokashﬁ, and M. K. Marina, “Network
+slicing in 5G: Survey and challenges,” IEEE Commun. Mag. , vol. 55,
+no. 5, pp. 94–100, May 2017.
+[5] S. Aleksic, “Towards ﬁfth-generation (5G) optical transport networks,”
+inProc. ICTON , 2015, pp. 1–4.
+[6] R. Boutaba, N. Shahriar, and S. Fathi, “Elastic optical networking for
+5G transport,” J. Netw. Syst. Manag. , vol. 25, no. 4, pp. 819–847, 2017.
+[7] L. Gong and Z. Zhu, “Virtual optical network embedding (VONE) over
+elastic optical networks,” J. Lightw. Technol. , vol. 32, no. 3, pp. 450–460,
+Feb. 1, 2014.
+[8] N. Shahriar et al., “Achieving a fully-ﬂexible virtual network embed-
+ding in elastic optical networks,” in Proc. IEEE INFOCOM , 2019,
+pp. 1756–1764.
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 14 ---
+JOHARI et al.: DRL-ASSISTED REOPTIMIZATION OF NETWORK SLICE EMBEDDING 813
+[9] B. C. Chatterjee, S. Ba, and E. Oki, “Fragmentation problems and
+management approaches in elastic optical networks: A survey,” IEEE
+Commun. Surveys Tuts. , vol. 20, no. 1, pp. 183–210, 1st Quart., 2018.
+[10] H. Beyranvand, M. Maier, and J. A. Salehi, “An analytical framework
+for the performance evaluation of node-and network-wise operation sce-
+narios in elastic optical networks,” IEEE Trans. Commun. , vol. 62, no. 5,
+pp. 1621–1633, May 2014.
+[11] V . Mnih et al., “Human-level control through deep reinforcement
+learning,” Nature , vol. 518, no. 7540, pp. 529–533, 2015.
+[12] V . Mnih et al., “Asynchronous methods for deep reinforcement learning,”
+inProc. Int. Conf. Mach. Learn. , 2016, pp. 1928–1937.
+[13] Y . Ujjwal and J. Thangaraj, “Review and analysis of elastic optical
+network and sliceable bandwidth variable transponder architecture,” Opt.
+Eng., vol. 57, no. 11, 2018, Art. no. 110802.
+[14] A. Pagès, J. Perelló, S. Spadaro, and J. Comellas, “Optimal route,
+spectrum, and modulation level assignment in split-spectrum-enabled
+dynamic elastic optical networks,” IEEE/OSA J. Opt. Commun. Netw. ,
+vol. 6, no. 2, pp. 114–126, Feb. 2014.
+[15] F. Cugini et al., “Push-pull defragmentation without trafﬁc disruption
+in ﬂexible grid optical networks,” J. Lightw. Technol. , vol. 31, no. 1,
+pp. 125–133, Jan. 1, 2013.
+[16] R. Proietti et al., “Rapid and complete hitless defragmentation method
+using a coherent RX LO with fast wavelength tracking in elastic opticalnetworks,” Opt. Exp. , vol. 20, no. 24, pp. 26958–26968, 2012.
+[17] T. Takagi, H. Hasegawa, K.-I. Sato, Y . Sone, A. Hirano, and M. Jinno,
+“Disruption minimized spectrum defragmentation in elastic optical path
+networks that adopt distance adaptive modulation,” in Proc. ECOC ,
+2011, pp. 1–3.
+[18] P. Lechowicz, M. Tornatore, A. Wlodarczyk, and K. Walkowiak,
+“Fragmentation-aware algorithm with bordering super-channels in spec-trally/spatially ﬂexible optical networks,” IEEE/OSA J. Opt. Commun.
+Netw. , vol. 12, no. 5, pp. 133–145, May 2020.
+[19] E. H. L. Aarts and J. Korst, Simulated Annealing and Boltzmann
+Machines . Chichester, U.K.: Wiley, 1988.
+[20] T. Haarnoja, H. Tang, P. Abbeel, and S. Levine, “Reinforcement learning
+with deep energy-based policies,” in Proc. Int. Conf. Mach. Learn. , 2017,
+pp. 1352–1361.
+[21] S. Taeb et al., “Reoptimizing network slice embedding on EON-enabled
+transport networks,” in Proc. 17th Int. Conf. Netw. Serv. Manag. (CNSM) ,
+2021, pp. 292–300.
+[22] J. Comellas, L. Vicario, and G. Junyent, “Proactive defragmentation in
+elastic optical networks under dynamic load conditions,” Photon. Netw.
+Commun. , vol. 36, no. 1, pp. 26–34, 2018.
+[23] S. Shakya, N. Pradhan, X. Cao, Z. Ye, and C. Qiao, “Virtual network
+embedding and reconﬁguration in elastic optical networks,” in Proc.
+IEEE GLOBECOM , 2014, pp. 2160–2165.
+[24] M. Zhu, S. Zhang, Q. Sun, G. Li, B. Chen, and J. Gu, “Fragmentation-
+aware VONE in elastic optical networks,” J. Opt. Commun. Netw. ,
+vol. 10, no. 9, pp. 809–822, Sep. 2018.
+[25] S. Fernández-Martínez, B. Barán, and D. P. Pinto-Roa, “Spectrum
+defragmentation algorithms in elastic optical networks,” Opt. Switch.
+Netw. , vol. 34, pp. 10–22, Nov. 2019.
+[26] R. Wang and B. Mukherjee, “Provisioning in elastic optical networks
+with non-disruptive defragmentation,” J. Lightw. Technol. , vol. 31,
+no. 15, pp. 2491–2500, Aug. 1, 2013.
+[27] M. Zhang, C. You, H. Jiang, and Z. Zhu, “Dynamic and adaptive band-
+width defragmentation in spectrum-sliced elastic optical networks with
+time-varying trafﬁc,” J. Lightw. Technol. , vol. 32, no. 5, pp. 1014–1023,
+Mar. 1, 2014.
+[28] S. Shakya and X. Cao, “Spectral defragmentation in elastic optical path
+networks using independent sets,” in Proc. Natw. Fiber Opt. Eng. Conf. ,
+2013, pp. 1–3.
+[29] E. J. Dávalos, M. F. Romero, S. M. Galeano, D. A. Báez,
+A. Leiva, and B. Baran, “Spectrum defragmentation in elastic optical
+networks: Two approaches with metaheuristics,” IEEE Access ,v o l .7 ,
+pp. 119835–119843, 2019.
+[30] Y . Zeng, N. Hua, X. Zheng, H. Zhang, B. Zhou, and Y . Cao,
+“Defragmentation of ﬂexible optical networks based on simulated
+annealing,” in Proc. IEEE ACP , 2012, pp. 1–3.
+[31] S. K. Singh, W. Bziuk, and A. Jukan, “Analytical performance modeling
+of spectrum defragmentation in elastic optical link networks,” Opt.
+Switch. Netw. , vol. 24, pp. 25–38, Apr. 2017.
+[32] J. Kim, S. Yan, A. Fumagalli, E. Oki, and N. Yamanaka, “An analytical
+model of spectrum fragmentation in a two-service elastic optical link,”
+inProc. IEEE Global Commun. Conf. (GLOBECOM) , 2015, pp. 1–6.[33] T. Ahmed et al., “Dynamic routing, spectrum, and modulation-format
+allocation in mixed-grid optical networks,” IEEE/OSA J. Opt. Commun.
+Netw. , vol. 12, no. 5, pp. 79–88, May 2020.
+[34] G. Zhang, M. De Leenheer, A. Morea, and B. Mukherjee, “A survey on
+OFDM-based elastic core optical networking,” IEEE Commun. Surveys
+Tuts. , vol. 15, no. 1, pp. 65–87, 1st Quart., 2013.
+[35] S. B. Masti and S. V . Raghavan, “Simulated annealing algorithm for
+virtual network reconﬁguration,” in Proc. IEEE 8th Euro-NF Conf. Next
+Gener. Internet , 2012, pp. 95–102.
+[36] H. Duong, B. Jaumard, D. Coudert, and R. Armolavicius, “Efﬁcient
+make before break capacity defragmentation,” in Proc. IEEE HPSR ,
+2018, pp. 1–6.
+[37] N. Vieillard, O. Pietquin, and M. Geist, “Munchausen reinforcement
+learning,” in Proc. Int. Conf. Adv. Neural Inf. Process. Syst. , vol. 33,
+2020, pp. 4235–4246.
+[38] T. Haarnoja, V . Pong, A. Zhou, M. Dalal, P. Abbeel, and S. Levine,
+“Composable deep reinforcement learning for robotic manipulation,” inProc. IEEE Int. Conf. Robot. Autom. (ICRA) , 2018, pp. 6244–6251.
+[39] L.-J. Lin, “Self-improving reactive agents based on reinforcement learn-
+ing, planning and teaching,” Mach. Learn. , vol. 8, no. 3, pp. 293–321,
+1992.
+Seyed Soheil Johari (Graduate Student Member,
+IEEE) received the B.Sc. degree in electrical engi-neering from the Sharif University of Technology in2020. He is a Graduate Researcher with the David
+R. Cheriton School of Computer Science, University
+of Waterloo. His research focuses on the applicationof machine learning techniques for data-driven man-agement and orchestration of 5G network slices. He
+was a recipient of the Best Student Paper Award at
+IEEE/IFIP NOMS 2022.
+Sepehr Taeb received the B.Sc. degree in com-
+puter engineering from the Sharif University of
+Technology in 2016, and the M.Math. degree incomputer science from the University of Waterlooin 2019, where he is a Research Assistant with the
+David R. Cheriton School of Computer Science.
+His research interests include network virtualization,optical networks, and Internet of Drones.
+Nashid Shahriar (Member, IEEE) received the
+Ph.D. degree from the School of Computer Science,University of Waterloo in 2020. He is an AssistantProfessor with the Department of Computer Science,
+University of Regina. His research interests include
+network virtualization, 5G network slicing, andnetwork reliability. He was a recipient of the 2020
+Ph.D. Alumni Gold Medal, the 2021 Mathematics
+Doctoral Prize, the Ontario Graduate Scholarship,the President’s Graduate Scholarship, and theDavid R. Cheriton Graduate Scholarship with the
+University of Waterloo. His research received several recognitions, including
+the IEEE/IFIP NOMS 2022 Best Student Paper Award, the IFIP/IEEE IM2021 Best Ph.D. Dissertation Award, the IEEE/ACM/IFIP CNSM 2019 BestPaper Award, the IEEE NetSoft 2019 Best Student Paper Award, and the
+IEEE/ACM/IFIP CNSM 2017 Best Paper Award.
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 
+
+--- PAGE 15 ---
+814 IEEE TRANSACTIONS ON NETWORK AND SERVICE MANAGEMENT, VOL. 20, NO. 1, MARCH 2023
+Shihabur Rahman Chowdhury (Student Member,
+IEEE) received the Ph.D. degree in computer sci-ence from the University of Waterloo in 2021. He iscurrently a Senior Software Engineer with the Apple
+Knowledge Platform. His research interests include
+various aspects of building and managing networksand large-scale distributed systems. His Ph.D. dis-sertation “Resource Management in Softwarized
+Networks” was recognized by the 2021 University of
+Waterloo Alumni Gold Medal (Ph.D.) and the 2022IEEE/IFIP NOMS 2022 Best Dissertation Award.
+His contributions to the network management research has received several
+recognitions, including the 2021 IEEE CNOM Young Professional Award,and the Best Paper Awards at IEEE/ACM/IFIP CNSM 2019, IEEE NetSoft2019, and IEEE/ACM/IFIP CNSM 2017 conferences.
+Massimo Tornatore (Fellow, IEEE) is an Associate
+Professor with the Politecnico di Milano, Italy. Healso held an appointment as an Adjunct Professorwith the University of California at Davis, Davis,
+USA, and as a Visiting Professor with the University
+of Waterloo, Canada. He coauthored more than400 conference and journal papers (with 19 bestpaper awards) and the recent Handbook of Optical
+Networks (Springer). His research interests include
+performance evaluation and design of commu-nication networks (with an emphasis on optical
+networking), and machine learning application for network management. He
+is a member of the editorial board of IEEE C
+OMMUNICATION SURVEYS AND
+TUTORIALS , IEEE C OMMUNICATION LETTERS , IEEE T RANSACTIONS ON
+NETWORK AND SERVICE MANAGEMENT , and IEEE/ACM T RANSACTIONS
+ONNETWORKING .
+Raouf Boutaba (Fellow, IEEE) received the M.Sc.
+and Ph.D. degrees in computer science fromSorbonne University in 1990 and 1994, respectively.
+He is currently a University Chair Professor and
+the Director of the David R. Cheriton School ofComputer Science, University of Waterloo, Canada.He also holds an INRIA International Chair in
+France. His research interests include resource and
+service management in networks and distributedsystems. He was the Founding Editor-in-Chief of
+the IEEE T
+RANSACTIONS ON NETWORK AND
+SERVICE MANAGEMENT from 2007 to 2010 and is the current Editor-in-
+Chief of the IEEE J OURNAL ON SELECTED AREAS IN COMMUNICATIONS .
+He is a Fellow of the Engineering Institute of Canada, the Canadian Academy
+of Engineering, and the Royal Society of Canada.
+Jeebak Mitra received the M.A.Sc. and Ph.D.
+degrees in electrical engineering from TheUniversity of British Columbia in 2005 and 2010,respectively. From 2010 to 2011, he was a Senior
+System Engineer with Riot Micro, leading the
+system-level design for a local thermal equilibriumbaseband. From 2011 to 2012, he was a TeamLeader for physical-layer DSP design with BLINQ
+Networks, Ottawa, focusing on small-cell backhaul
+products. Since 2013, he has been a SeniorStaff Engineer with Huawei Technologies Canada
+Research Center, Ottawa, in the areas of algorithm design and implementation
+for coherent high-speed optical transceivers and ﬂexible optical networks.His research interests lie in the area of high-performance communicationsystems design focusing on optical and wireless networks. He received the
+Best Student Paper Award at the IEEE Canadian Conference in Electrical
+and Computer Engineering 2009. He was a co-recipient of the Best PaperAward at IEEE/ACM/IFIP CNSM 2017 and 2019.
+Mahdi Hemmati (Member, IEEE) received the
+M.Sc. degree in electrical engineering—systems and
+control from the Sharif University of Technology,
+Iran, in 2003, and the Ph.D. degree in electrical andcomputer engineering from the University of Ottawain 2017. He is currently a Senior Staff Engineer
+with Huawei Technologies Canada Research Center,
+Ottawa. His research interests include distributedcontrol and optimization, fair resource allocation,and reinforcement learning applications in network
+automation. He was a recipient of the NSERC
+Postgraduate Scholarship during his doctoral studies. He was a co-recipientof the Best Paper Award at IEEE/ACM/IFIP CNSM 2019.
+Authorized licensed use limited to: Hanoi University of Science & Technology. Downloaded on April 15,2026 at 10:44:59 UTC from IEEE Xplore.  Restrictions apply. 

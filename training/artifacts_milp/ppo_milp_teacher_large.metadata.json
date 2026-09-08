@@ -1,0 +1,47 @@
+{
+  "algorithm": "MaskablePPO",
+  "teacher": "licensed IBM CPLEX MILP",
+  "training_method": "MILP behavior cloning + PPO + large-load curriculum",
+  "timesteps": 8192,
+  "teacher_stats": {
+    "teacher_files": 103,
+    "usable_teacher_files": 99,
+    "matched_route_actions": 771,
+    "unmatched_teacher_routes": 5959,
+    "teacher_initial_cost_sum": 5338.0,
+    "teacher_milp_cost_sum": 3054.0000000000014,
+    "rollout_best_cost_sum": 4344.0,
+    "demonstration_transitions": 874,
+    "bc_final_validation_accuracy": 0.125
+  },
+  "demand_points": [
+    2,
+    4,
+    5,
+    6,
+    8,
+    10,
+    12,
+    15,
+    18,
+    20,
+    25,
+    30,
+    40,
+    50
+  ],
+  "max_demands": 50,
+  "k_paths": 10,
+  "max_steps": 32,
+  "seed": 42,
+  "checkpoint": "training\\artifacts_milp\\ppo_milp_teacher_large.zip",
+  "large_load_timesteps": 4096,
+  "large_load_demand_points": [
+    20,
+    25,
+    30,
+    40,
+    50
+  ],
+  "large_load_learning_rate": 8e-05
+}

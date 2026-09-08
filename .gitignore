@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Bỏ qua thư mục môi trường ảo (virtual environment)
+.venv/
+*.zip
